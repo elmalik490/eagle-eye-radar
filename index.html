@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EAGLE EYE — Opportunity Radar v0.1 (DEMO)</title>
+    <!-- Tailwind CSS for Mobile Responsive UI -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #0b0f17; color: #e2e8f0; font-family: monospace; }
+        .hud-border { border: 1px solid #1e293b; box-shadow: 0 0 15px rgba(6, 182, 212, 0.1); }
+        .glow-text { text-shadow: 0 0 8px rgba(6, 182, 212, 0.6); }
+    </style>
+</head>
+<body class="p-4 max-w-md mx-auto min-h-screen flex flex-col justify-between">
+
+    <!-- HEADER -->
+    <header class="border-b border-slate-800 pb-3 mb-4">
+        <div class="flex justify-between items-center">
+            <h1 class="text-cyan-400 font-bold text-lg tracking-wider glow-text">🦅 EAGLE EYE</h1>
+            <span class="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs px-2 py-0.5 rounded font-mono">
+                DEMO / SYNTHETIC
+            </span>
+        </div>
+        <p class="text-slate-500 text-xs mt-1">Opportunity Radar v0.1 — Revenue Recovery Core</p>
+    </header>
+
+    <!-- SELECTORS -->
+    <main class="space-y-4 flex-1">
+        <div class="hud-border bg-slate-900/60 p-4 rounded-lg space-y-3">
+            <div>
+                <label class="block text-slate-400 text-xs mb-1">SELECT LOCATION</label>
+                <select id="locationSelect" class="w-full bg-slate-950 border border-slate-700 text-cyan-300 text-sm p-2 rounded focus:outline-none focus:border-cyan-500">
+                    <option value="Phoenix, AZ">Phoenix, AZ (USA)</option>
+                    <option value="Miami, FL">Miami, FL (USA)</option>
+                    <option value="Houston, TX">Houston, TX (USA)</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-slate-400 text-xs mb-1">SELECT SECTOR</label>
+                <select id="sectorSelect" class="w-full bg-slate-950 border border-slate-700 text-cyan-300 text-sm p-2 rounded focus:outline-none focus:border-cyan-500">
+                    <option value="HVAC & Climate Control">HVAC & Climate Control</option>
+                    <option value="Plumbing & Emergency Services">Plumbing & Emergency Services</option>
+                    <option value="Roofing Repair">Roofing Repair</option>
+                </select>
+            </div>
+
+            <button id="scanBtn" onclick="runScan()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-sm py-2.5 rounded transition shadow-lg shadow-cyan-900/30 flex justify-center items-center gap-2">
+                <span>🦅 SCAN FOR LEAKAGE</span>
+            </button>
+        </div>
+
+        <!-- SCANNING ANIMATION STATE -->
+        <div id="scanningState" class="hidden text-center py-8 space-y-2">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-400"></div>
+            <p class="text-cyan-400 text-xs tracking-widest animate-pulse">ANALYZING REGIONAL DATA STREAMS...</p>
+        </div>
+
+        <!-- OPPORTUNITY CARD CONTAINER -->
+        <div id="opportunityCard" class="hidden hud-border bg-slate-900/90 p-4 rounded-lg space-y-3 border-l-4 border-l-cyan-500">
+            
+            <div class="flex justify-between items-start border-b border-slate-800 pb-2">
+                <div>
+                    <span id="cardSector" class="text-cyan-400 text-xs font-bold uppercase">HVAC</span>
+                    <h2 id="cardLocation" class="text-white text-base font-bold">Phoenix, AZ</h2>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                    <span class="bg-amber-950/80 border border-amber-500/40 text-amber-400 text-[10px] px-1.5 py-0.5 rounded">
+                        DATA: DEMO / SYNTHETIC
+                    </span>
+                    <span class="bg-red-950/80 border border-red-500/40 text-red-400 text-[10px] px-1.5 py-0.5 rounded">
+                        STATUS: UNVERIFIED
+                    </span>
+                </div>
+            </div>
+
+            <!-- METRICS GRID -->
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <div class="bg-slate-950 p-2 rounded border border-slate-800">
+                    <span class="text-slate-400 block text-[10px]">REVENUE AT RISK</span>
+                    <span id="riskValue" class="text-emerald-400 font-bold text-sm">$14,200 / mo</span>
+                    <span class="text-slate-500 text-[9px] block">(ESTIMATED)</span>
+                </div>
+                <div class="bg-slate-950 p-2 rounded border border-slate-800">
+                    <span class="text-slate-400 block text-[10px]">CONFIDENCE SCORE</span>
+                    <span id="confidenceScore" class="text-amber-300 font-bold text-sm">80%</span>
+                    <span class="text-slate-500 text-[9px] block">(SEASONAL ALGORITHM)</span>
+                </div>
+            </div>
+
+            <!-- EVIDENCE SUMMARY -->
+            <div class="bg-slate-950 p-2.5 rounded border border-slate-800 text-xs space-y-1">
+                <span class="text-slate-400 font-bold text-[10px] block text-cyan-400">EVIDENCE DETECTED:</span>
+                <p id="evidenceText" class="text-slate-300 leading-relaxed text-[11px]">
+                    • 14 Unanswered web/phone leads detected across 5 benchmark shops.<br>
+                    • Avg response delay: > 180 mins during peak heatwaves.
+                </p>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+                <button onclick="toggleVerifyModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2 rounded border border-slate-600 transition">
+                    🔍 VERIFY EVIDENCE
+                </button>
+                <button onclick="toggleActModal()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs py-2 rounded transition shadow-md shadow-emerald-950">
+                    ⚡ ACT / DRAFT ACTION
+                </button>
+            </div>
+        </div>
+
+        <!-- VERIFY MODAL / PANEL -->
+        <div id="verifyModal" class="hidden hud-border bg-slate-950 p-4 rounded-lg space-y-2 text-xs border-amber-500/30">
+            <h3 class="text-amber-400 font-bold border-b border-slate-800 pb-1">🔍 EVIDENCE VERIFICATION DETAILS</h3>
+            <p class="text-slate-300 text-[11px]">
+                <strong class="text-slate-400">Source Quality:</strong> Synthetic Benchmark Model v0.1<br>
+                <strong class="text-slate-400">Observation Mode:</strong> Unverified Synthetic Probe<br>
+                <strong class="text-slate-400">Primary Friction:</strong> After-hours call dumping to voicemail without automated SMS text-back.
+            </p>
+            <p class="text-amber-400/80 text-[10px] italic">
+                * Note: Real company verification requires manual audit or permission-based tracking.
+            </p>
+            <button onclick="toggleVerifyModal()" class="w-full bg-slate-800 text-slate-400 text-[10px] py-1 rounded">CLOSE VERIFICATION</button>
+        </div>
+
+        <!-- ACT / DRAFT ACTION MODAL -->
+        <div id="actModal" class="hidden hud-border bg-slate-950 p-4 rounded-lg space-y-3 text-xs border-emerald-500/30">
+            <h3 class="text-emerald-400 font-bold border-b border-slate-800 pb-1">⚡ RECOMMENDED RECOVERY DRAFT</h3>
+            <div class="bg-slate-900 p-2.5 rounded text-slate-300 font-mono text-[11px] border border-slate-800">
+                "Hi [Shop Owner], noticed your AC shop gets hit with high after-hours call volume. We drafted a 60-second text-back system to stop missed calls from going to local competitors. Want to see a 30-sec demo?"
+            </div>
+            <div class="bg-amber-500/10 border border-amber-500/20 p-2 rounded text-[10px] text-amber-300">
+                🛡️ HUMAN APPROVAL REQUIRED: No SMS or external messages are sent automatically.
+            </div>
+            <button onclick="alert('Action Approved in Local Memory (Demo). Zero external messages sent.')" class="w-full bg-emerald-600 text-slate-950 font-bold py-1.5 rounded">
+                APPROVE DRAFT (HUMAN-IN-THE-LOOP)
+            </button>
+            <button onclick="toggleActModal()" class="w-full bg-slate-800 text-slate-400 text-[10px] py-1 rounded">CANCEL</button>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="text-center text-[10px] text-slate-600 pt-4 border-t border-slate-900">
+        EAGLE EYE PROTOCOL • ZERO-COST PROTOTYPE • NO PAID APIS
+    </footer>
+
+    <!-- INTERACTIVE SCRIPT -->
+    <script>
+        function runScan() {
+            const loc = document.getElementById('locationSelect').value;
+            const sec = document.getElementById('sectorSelect').value;
+            
+            document.getElementById('opportunityCard').classList.add('hidden');
+            document.getElementById('verifyModal').classList.add('hidden');
+            document.getElementById('actModal').classList.add('hidden');
+            document.getElementById('scanningState').classList.remove('hidden');
+
+            setTimeout(() => {
+                document.getElementById('scanningState').classList.add('hidden');
+                document.getElementById('cardLocation').innerText = loc;
+                document.getElementById('cardSector').innerText = sec;
+                
+                if (loc.includes("Phoenix")) {
+                    document.getElementById('riskValue').innerText = "$14,200 / mo";
+                    document.getElementById('confidenceScore').innerText = "80%";
+                } else if (loc.includes("Miami")) {
+                    document.getElementById('riskValue').innerText = "$18,500 / mo";
+                    document.getElementById('confidenceScore').innerText = "85%";
+                } else {
+                    document.getElementById('riskValue').innerText = "$11,000 / mo";
+                    document.getElementById('confidenceScore').innerText = "75%";
+                }
+
+                document.getElementById('opportunityCard').classList.remove('hidden');
+            }, 1200);
+        }
+
+        function toggleVerifyModal() {
+            const modal = document.getElementById('verifyModal');
+            modal.classList.toggle('hidden');
+            document.getElementById('actModal').classList.add('hidden');
+        }
+
+        function toggleActModal() {
+            const modal = document.getElementById('actModal');
+            modal.classList.toggle('hidden');
+            document.getElementById('verifyModal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
