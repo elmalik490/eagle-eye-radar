@@ -47,3 +47,6 @@ A private commercial-validation batch exists outside GitHub and is not part of t
 2. Have the receiving account verify repository and live-site access.
 3. Arrange separate private access only if the private validation material is needed.
 4. Stop at this checkpoint. Wait for a new, explicit scope before changing the product or conducting outreach.
+
+## Active implementation continuation — 2026-10-08
+The owner explicitly authorized continuation and implementation of the existing v0.1 project; this section supersedes the earlier checkpoint-only next-step instruction above. Current changes preserve the static page and Pages workflow while adding transparent synthetic scenario arithmetic, sector-specific presets, human-led review checklist, and local-only editable draft. No real source, backend, or external communication is introduced. See `IMPLEMENTATION_PLAN.md`, `PROJECT_STATUS.md`, `CHANGELOG.md`, and `KNOWN_ISSUES.md` for the current state. Private validation materials remain excluded.

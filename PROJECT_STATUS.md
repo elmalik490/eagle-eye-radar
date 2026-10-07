@@ -39,3 +39,6 @@ Across the three flows, the card retained `DEMO / SYNTHETIC` and `UNVERIFIED`. T
 - No commercial validation conclusions. A private commercial-validation batch exists outside this public repository; no prospect or contact details are included here.
 
 See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for limitations and [HANDOVER.md](HANDOVER.md) for transfer precautions.
+
+## Implementation update — 2026-10-08
+The existing prototype now explains assumption-driven synthetic scenario ranges and demo priority arithmetic, varies assumptions by sector, and offers a human review checklist plus editable internal-only note. The review checklist does not validate any record; the UI keeps all output synthetic and unverified. The app remains a static single-page prototype with no live sources or external action capability. See `CHANGELOG.md` for the change summary and `IMPLEMENTATION_PLAN.md` for the ranked plan.

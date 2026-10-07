@@ -34,3 +34,6 @@ Then open <http://localhost:8080>. The page loads Tailwind CSS from its public C
 ## Privacy boundary
 
 A private commercial-validation batch exists outside this public repository. It is intentionally excluded from GitHub and from these documents. Do not add prospect identities, contact details, private research, or private spreadsheet contents to this public repository.
+
+## Current prototype workflow
+The current UI turns locally selected city/sector presets into a transparent **synthetic scenario**, with an assumption-based range and explicitly heuristic priority score. It includes a human-led evidence checklist (which never verifies the synthetic result) and an editable internal note. It has no real discovery, real verification, backend, CRM, persistence, or outbound messaging. The latest implementation scope and validation summary are documented in `IMPLEMENTATION_PLAN.md`, `PROJECT_STATUS.md`, `CHANGELOG.md`, and `KNOWN_ISSUES.md`.

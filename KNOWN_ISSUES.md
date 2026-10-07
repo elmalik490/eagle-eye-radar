@@ -22,3 +22,10 @@ No blocking JavaScript error was observed in the documented live smoke test. The
 
 - The private commercial-validation materials are intentionally excluded from this public repository. Transfer or permissions for those materials must be arranged separately if needed by another account.
 - The public repository is not a safe destination for prospect identities, contact details, private research, or private spreadsheet contents.
+
+## Updated prototype behavior — 2026-10-08
+- The prior hard-coded location-only risk and confidence figures were replaced by fixed synthetic sector assumptions, an assumption-based monthly range, and a weighted demo-priority arithmetic. These remain fictional scenario presets, not validated estimates or confidence values.
+- Sector-specific scenario prompt text replaces the earlier generic HVAC-only evidence paragraph; prompts are explicitly not observed signals.
+- The Verify panel is now a human-led checklist. Checking boxes never verifies a business or changes the unverified status; there is no record persistence.
+- The Act panel is now an editable/copyable internal note only. “Mark reviewed” is local page state, not an approval record; nothing is sent.
+- Layout is responsive and no longer depends on Tailwind CDN. Browser compatibility and accessibility have only received prototype smoke testing, not formal audit.

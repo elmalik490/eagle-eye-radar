@@ -1,191 +1,22 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EAGLE EYE — Opportunity Radar v0.1 (DEMO)</title>
-    <!-- Tailwind CSS for Mobile Responsive UI -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #0b0f17; color: #e2e8f0; font-family: monospace; }
-        .hud-border { border: 1px solid #1e293b; box-shadow: 0 0 15px rgba(6, 182, 212, 0.1); }
-        .glow-text { text-shadow: 0 0 8px rgba(6, 182, 212, 0.6); }
-    </style>
-</head>
-<body class="p-4 max-w-md mx-auto min-h-screen flex flex-col justify-between">
-
-    <!-- HEADER -->
-    <header class="border-b border-slate-800 pb-3 mb-4">
-        <div class="flex justify-between items-center">
-            <h1 class="text-cyan-400 font-bold text-lg tracking-wider glow-text">🦅 EAGLE EYE</h1>
-            <span class="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs px-2 py-0.5 rounded font-mono">
-                DEMO / SYNTHETIC
-            </span>
-        </div>
-        <p class="text-slate-500 text-xs mt-1">Opportunity Radar v0.1 — Revenue Recovery Core</p>
-    </header>
-
-    <!-- SELECTORS -->
-    <main class="space-y-4 flex-1">
-        <div class="hud-border bg-slate-900/60 p-4 rounded-lg space-y-3">
-            <div>
-                <label class="block text-slate-400 text-xs mb-1">SELECT LOCATION</label>
-                <select id="locationSelect" class="w-full bg-slate-950 border border-slate-700 text-cyan-300 text-sm p-2 rounded focus:outline-none focus:border-cyan-500">
-                    <option value="Phoenix, AZ">Phoenix, AZ (USA)</option>
-                    <option value="Miami, FL">Miami, FL (USA)</option>
-                    <option value="Houston, TX">Houston, TX (USA)</option>
-                </select>
-            </div>
-
-            <div>
-                <label class="block text-slate-400 text-xs mb-1">SELECT SECTOR</label>
-                <select id="sectorSelect" class="w-full bg-slate-950 border border-slate-700 text-cyan-300 text-sm p-2 rounded focus:outline-none focus:border-cyan-500">
-                    <option value="HVAC & Climate Control">HVAC & Climate Control</option>
-                    <option value="Plumbing & Emergency Services">Plumbing & Emergency Services</option>
-                    <option value="Roofing Repair">Roofing Repair</option>
-                </select>
-            </div>
-
-            <button id="scanBtn" onclick="runScan()" class="w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-sm py-2.5 rounded transition shadow-lg shadow-cyan-900/30 flex justify-center items-center gap-2">
-                <span>🦅 SCAN FOR LEAKAGE</span>
-            </button>
-        </div>
-
-        <!-- SCANNING ANIMATION STATE -->
-        <div id="scanningState" class="hidden text-center py-8 space-y-2">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-400"></div>
-            <p class="text-cyan-400 text-xs tracking-widest animate-pulse">ANALYZING REGIONAL DATA STREAMS...</p>
-        </div>
-
-        <!-- OPPORTUNITY CARD CONTAINER -->
-        <div id="opportunityCard" class="hidden hud-border bg-slate-900/90 p-4 rounded-lg space-y-3 border-l-4 border-l-cyan-500">
-            
-            <div class="flex justify-between items-start border-b border-slate-800 pb-2">
-                <div>
-                    <span id="cardSector" class="text-cyan-400 text-xs font-bold uppercase">HVAC</span>
-                    <h2 id="cardLocation" class="text-white text-base font-bold">Phoenix, AZ</h2>
-                </div>
-                <div class="flex flex-col items-end gap-1">
-                    <span class="bg-amber-950/80 border border-amber-500/40 text-amber-400 text-[10px] px-1.5 py-0.5 rounded">
-                        DATA: DEMO / SYNTHETIC
-                    </span>
-                    <span class="bg-red-950/80 border border-red-500/40 text-red-400 text-[10px] px-1.5 py-0.5 rounded">
-                        STATUS: UNVERIFIED
-                    </span>
-                </div>
-            </div>
-
-            <!-- METRICS GRID -->
-            <div class="grid grid-cols-2 gap-2 text-xs">
-                <div class="bg-slate-950 p-2 rounded border border-slate-800">
-                    <span class="text-slate-400 block text-[10px]">REVENUE AT RISK</span>
-                    <span id="riskValue" class="text-emerald-400 font-bold text-sm">$14,200 / mo</span>
-                    <span class="text-slate-500 text-[9px] block">(ESTIMATED)</span>
-                </div>
-                <div class="bg-slate-950 p-2 rounded border border-slate-800">
-                    <span class="text-slate-400 block text-[10px]">CONFIDENCE SCORE</span>
-                    <span id="confidenceScore" class="text-amber-300 font-bold text-sm">80%</span>
-                    <span class="text-slate-500 text-[9px] block">(SEASONAL ALGORITHM)</span>
-                </div>
-            </div>
-
-            <!-- EVIDENCE SUMMARY -->
-            <div class="bg-slate-950 p-2.5 rounded border border-slate-800 text-xs space-y-1">
-                <span class="text-slate-400 font-bold text-[10px] block text-cyan-400">EVIDENCE DETECTED:</span>
-                <p id="evidenceText" class="text-slate-300 leading-relaxed text-[11px]">
-                    • 14 Unanswered web/phone leads detected across 5 benchmark shops.<br>
-                    • Avg response delay: > 180 mins during peak heatwaves.
-                </p>
-            </div>
-
-            <!-- ACTION BUTTONS -->
-            <div class="grid grid-cols-2 gap-2 pt-1">
-                <button onclick="toggleVerifyModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs py-2 rounded border border-slate-600 transition">
-                    🔍 VERIFY EVIDENCE
-                </button>
-                <button onclick="toggleActModal()" class="bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs py-2 rounded transition shadow-md shadow-emerald-950">
-                    ⚡ ACT / DRAFT ACTION
-                </button>
-            </div>
-        </div>
-
-        <!-- VERIFY MODAL / PANEL -->
-        <div id="verifyModal" class="hidden hud-border bg-slate-950 p-4 rounded-lg space-y-2 text-xs border-amber-500/30">
-            <h3 class="text-amber-400 font-bold border-b border-slate-800 pb-1">🔍 EVIDENCE VERIFICATION DETAILS</h3>
-            <p class="text-slate-300 text-[11px]">
-                <strong class="text-slate-400">Source Quality:</strong> Synthetic Benchmark Model v0.1<br>
-                <strong class="text-slate-400">Observation Mode:</strong> Unverified Synthetic Probe<br>
-                <strong class="text-slate-400">Primary Friction:</strong> After-hours call dumping to voicemail without automated SMS text-back.
-            </p>
-            <p class="text-amber-400/80 text-[10px] italic">
-                * Note: Real company verification requires manual audit or permission-based tracking.
-            </p>
-            <button onclick="toggleVerifyModal()" class="w-full bg-slate-800 text-slate-400 text-[10px] py-1 rounded">CLOSE VERIFICATION</button>
-        </div>
-
-        <!-- ACT / DRAFT ACTION MODAL -->
-        <div id="actModal" class="hidden hud-border bg-slate-950 p-4 rounded-lg space-y-3 text-xs border-emerald-500/30">
-            <h3 class="text-emerald-400 font-bold border-b border-slate-800 pb-1">⚡ RECOMMENDED RECOVERY DRAFT</h3>
-            <div class="bg-slate-900 p-2.5 rounded text-slate-300 font-mono text-[11px] border border-slate-800">
-                "Hi [Shop Owner], noticed your AC shop gets hit with high after-hours call volume. We drafted a 60-second text-back system to stop missed calls from going to local competitors. Want to see a 30-sec demo?"
-            </div>
-            <div class="bg-amber-500/10 border border-amber-500/20 p-2 rounded text-[10px] text-amber-300">
-                🛡️ HUMAN APPROVAL REQUIRED: No SMS or external messages are sent automatically.
-            </div>
-            <button onclick="alert('Action Approved in Local Memory (Demo). Zero external messages sent.')" class="w-full bg-emerald-600 text-slate-950 font-bold py-1.5 rounded">
-                APPROVE DRAFT (HUMAN-IN-THE-LOOP)
-            </button>
-            <button onclick="toggleActModal()" class="w-full bg-slate-800 text-slate-400 text-[10px] py-1 rounded">CANCEL</button>
-        </div>
-    </main>
-
-    <!-- FOOTER -->
-    <footer class="text-center text-[10px] text-slate-600 pt-4 border-t border-slate-900">
-        EAGLE EYE PROTOCOL • ZERO-COST PROTOTYPE • NO PAID APIS
-    </footer>
-
-    <!-- INTERACTIVE SCRIPT -->
-    <script>
-        function runScan() {
-            const loc = document.getElementById('locationSelect').value;
-            const sec = document.getElementById('sectorSelect').value;
-            
-            document.getElementById('opportunityCard').classList.add('hidden');
-            document.getElementById('verifyModal').classList.add('hidden');
-            document.getElementById('actModal').classList.add('hidden');
-            document.getElementById('scanningState').classList.remove('hidden');
-
-            setTimeout(() => {
-                document.getElementById('scanningState').classList.add('hidden');
-                document.getElementById('cardLocation').innerText = loc;
-                document.getElementById('cardSector').innerText = sec;
-                
-                if (loc.includes("Phoenix")) {
-                    document.getElementById('riskValue').innerText = "$14,200 / mo";
-                    document.getElementById('confidenceScore').innerText = "80%";
-                } else if (loc.includes("Miami")) {
-                    document.getElementById('riskValue').innerText = "$18,500 / mo";
-                    document.getElementById('confidenceScore').innerText = "85%";
-                } else {
-                    document.getElementById('riskValue').innerText = "$11,000 / mo";
-                    document.getElementById('confidenceScore').innerText = "75%";
-                }
-
-                document.getElementById('opportunityCard').classList.remove('hidden');
-            }, 1200);
-        }
-
-        function toggleVerifyModal() {
-            const modal = document.getElementById('verifyModal');
-            modal.classList.toggle('hidden');
-            document.getElementById('actModal').classList.add('hidden');
-        }
-
-        function toggleActModal() {
-            const modal = document.getElementById('actModal');
-            modal.classList.toggle('hidden');
-            document.getElementById('verifyModal').classList.add('hidden');
-        }
-    </script>
-</body>
-</html>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1118"><meta name="description" content="Eagle Eye Opportunity Radar — synthetic-only revenue recovery workflow prototype."><title>EAGLE EYE — Opportunity Radar v0.1 (DEMO)</title>
+<style>
+:root{color-scheme:dark;--bg:#0b1118;--panel:#111b26;--panel2:#0d1620;--line:#243443;--text:#e5edf4;--muted:#9aabba;--cyan:#56d8e7;--amber:#f5c66b;--green:#6fe0b0;--radius:14px;--shadow:0 14px 38px #0004}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#142635 0,var(--bg) 50rem);color:var(--text);font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}button,select,textarea{font:inherit;color:inherit}button{cursor:pointer}button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}.shell{width:min(100% - 28px,860px);margin:auto;min-height:100vh;display:flex;flex-direction:column}.top{padding:24px 0 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:16px}.brand{margin:0;color:var(--cyan);font-size:1.15rem;letter-spacing:.12em}.sub{color:var(--muted);font-size:.85rem;margin:.25rem 0 0}.pill{display:inline-flex;align-items:center;border:1px solid #705a2c;background:#342814;color:var(--amber);padding:5px 10px;border-radius:999px;font-size:.72rem;font-weight:750;white-space:nowrap}main{width:100%;padding:22px 0 32px;flex:1}.notice{background:#2b2212;border:1px solid #685229;color:#f4dfb1;padding:13px 15px;border-radius:12px;font-size:.9rem;margin-bottom:18px}.notice strong{color:#ffda83}.panel{background:linear-gradient(145deg,#14202c,var(--panel2));border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);margin-bottom:16px}.controls{display:grid;grid-template-columns:1fr 1fr auto;gap:14px;align-items:end}.field label{display:block;color:#c6d2dc;font-size:.78rem;font-weight:700;margin:0 0 7px}.field select{width:100%;min-height:48px;padding:10px 12px;background:#09121a;border:1px solid #34495a;border-radius:9px}.primary,.secondary,.quiet{border-radius:9px;min-height:46px;padding:10px 16px;font-weight:750;border:1px solid transparent}.primary{background:var(--cyan);color:#06212a}.primary:hover{filter:brightness(1.08)}.secondary{background:#153f38;border-color:#286b59;color:#a5f3cf}.quiet{background:#15212c;border-color:#344454;color:#d9e5ed}.primary:disabled{opacity:.7;cursor:wait}.scan-note,.fine{color:var(--muted);font-size:.78rem}.scan-note{margin:12px 0 0}.hidden{display:none!important}.status{color:var(--cyan);padding:22px 8px;text-align:center}.spinner{display:inline-block;width:19px;height:19px;border:2px solid #38505f;border-top-color:var(--cyan);border-radius:50%;vertical-align:middle;animation:spin .8s linear infinite;margin-right:8px}@keyframes spin{to{transform:rotate(360deg)}}.card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;border-bottom:1px solid var(--line);padding-bottom:14px}.eyebrow{font-size:.73rem;color:var(--cyan);font-weight:800;letter-spacing:.08em;text-transform:uppercase}.card-head h2{font-size:1.35rem;margin:2px 0}.tags{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end}.tag{font-size:.68rem;padding:4px 8px;border:1px solid #66542f;color:#ffd98b;background:#302614;border-radius:999px;font-weight:750}.tag.unverified{border-color:#714348;background:#301b20;color:#ffaaaa}.metrics{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0}.metric{background:#09131c;border:1px solid var(--line);padding:14px;border-radius:11px}.metric-label{color:#b7c4cf;font-size:.76rem;font-weight:700}.metric-value{font-size:1.24rem;color:var(--green);font-weight:800;display:block;margin:4px 0}.metric small{color:var(--muted)}.section-title{font-size:.9rem;margin:18px 0 8px}.explain{background:#0c151e;border:1px solid var(--line);padding:13px;border-radius:10px;color:#cbd7e0;font-size:.9rem}.math{display:grid;gap:6px;margin:0;padding:0;list-style:none}.math strong{color:var(--text)}.scoreline{display:grid;grid-template-columns:1fr auto;gap:12px;border-bottom:1px solid #1d2b38;padding:7px 0}.scoreline:last-child{border:0}.score{color:var(--cyan);font-weight:750}.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}.checklist{list-style:none;padding:0;margin:10px 0}.checklist li{margin:9px 0}.checklist label{display:flex;align-items:flex-start;gap:10px;cursor:pointer;color:#d6e0e8}.checklist input{width:20px;height:20px;accent-color:var(--cyan);flex:none;margin:2px 0 0}.check-summary{padding:10px 12px;background:#101d28;border-radius:9px;color:var(--muted);font-size:.84rem}.draft{width:100%;min-height:135px;resize:vertical;background:#09131c;border:1px solid #34495a;border-radius:9px;padding:12px;line-height:1.55}.draft-actions{display:flex;flex-wrap:wrap;gap:9px}.review-state{font-size:.84rem;color:var(--amber);margin:12px 0 0}.review-state.done{color:var(--green)}footer{padding:16px 0 24px;border-top:1px solid var(--line);color:#8b9aa8;font-size:.75rem;text-align:center}.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);max-width:calc(100% - 28px);padding:11px 16px;background:#e2fff1;color:#063b2b;border-radius:10px;box-shadow:var(--shadow);font-weight:700;z-index:3}@media(max-width:680px){.shell{width:min(100% - 22px,560px)}.top{align-items:flex-start;flex-direction:column;padding:18px 0 14px}.controls{grid-template-columns:1fr}.controls .primary{width:100%;min-height:50px}.panel{padding:15px}.card-head{flex-direction:column}.tags{justify-content:flex-start}.metrics{gap:8px}.actions{grid-template-columns:1fr}.actions button{min-height:48px}.draft-actions>*{flex:1 1 100%}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+</style></head>
+<body><div class="shell"><header class="top"><div><h1 class="brand">🦅 EAGLE EYE</h1><p class="sub">Opportunity Radar v0.1 · Revenue Recovery Workflow</p></div><span class="pill">DEMO · SYNTHETIC ONLY</span></header><main>
+<div class="notice"><strong>Prototype boundary:</strong> Everything below is illustrative synthetic data—not measured company performance, verified leakage, a forecast, or a real recovery estimate. No business data is queried and nothing is sent.</div>
+<section class="panel" aria-label="Opportunity radar controls"><div class="controls"><div class="field"><label for="locationSelect">LOCATION</label><select id="locationSelect"><option value="Phoenix, AZ">Phoenix, AZ (USA)</option><option value="Miami, FL">Miami, FL (USA)</option><option value="Houston, TX">Houston, TX (USA)</option></select></div><div class="field"><label for="sectorSelect">SERVICE SECTOR</label><select id="sectorSelect"><option value="hvac">HVAC &amp; Climate Control</option><option value="plumbing">Plumbing &amp; Emergency Services</option><option value="roofing">Roofing Repair</option></select></div><button id="scanBtn" class="primary" type="button">🦅 Build demo scenario</button></div><p class="scan-note">Scenario builder · local preset assumptions only · no data lookup</p></section>
+<div id="scanningState" class="status hidden" role="status" aria-live="polite"><span class="spinner" aria-hidden="true"></span>Building illustrative scenario…</div>
+<section id="opportunityCard" class="panel hidden" aria-labelledby="cardLocation"><div class="card-head"><div><div id="cardSector" class="eyebrow"></div><h2 id="cardLocation"></h2><p class="fine" style="margin:3px 0 0">Illustrative benchmark scenario · not a company finding</p></div><div class="tags"><span class="tag">DATA: SYNTHETIC</span><span class="tag unverified">EVIDENCE: UNVERIFIED</span></div></div>
+<div class="metrics"><div class="metric"><span class="metric-label">MODELED MONTHLY EXPOSURE</span><strong id="riskValue" class="metric-value"></strong><small id="riskNote"></small></div><div class="metric"><span class="metric-label">DEMO PRIORITY SCORE</span><strong id="confidenceScore" class="metric-value" style="color:var(--amber)"></strong><small>Heuristic prioritization · not probability or confidence</small></div></div>
+<h3 class="section-title">How this illustrative estimate is built</h3><div id="estimateExplanation" class="explain"></div><h3 class="section-title">Why it ranks here (demo heuristic)</h3><div id="scoreExplanation" class="explain"></div><h3 class="section-title">Scenario signal (synthetic, not observed)</h3><div id="evidenceText" class="explain"></div><div class="actions"><button id="verifyBtn" class="quiet" type="button">🔍 Review evidence checklist</button><button id="draftBtn" class="secondary" type="button">✎ Prepare internal draft</button></div></section>
+<section id="verifyPanel" class="panel hidden" aria-labelledby="verifyTitle"><h2 id="verifyTitle" class="section-title" style="margin-top:0">Evidence verification checklist</h2><p class="fine">This checklist does not verify a business. Complete it only after an authorized, human-led review of appropriate sources.</p><ul class="checklist"><li><label><input type="checkbox" class="evidenceCheck"> A permitted source and observation date are recorded</label></li><li><label><input type="checkbox" class="evidenceCheck"> The issue is corroborated by a second appropriate signal</label></li><li><label><input type="checkbox" class="evidenceCheck"> Scope, time window, and denominator are understood</label></li><li><label><input type="checkbox" class="evidenceCheck"> The business has authorized access where required</label></li></ul><div id="checkSummary" class="check-summary" role="status" aria-live="polite">0 of 4 review checks complete · Status remains UNVERIFIED.</div><p class="fine">Even completed checks do not change this demo's synthetic data status or verify an opportunity.</p></section>
+<section id="actPanel" class="panel hidden" aria-labelledby="draftTitle"><h2 id="draftTitle" class="section-title" style="margin-top:0">Internal next-step draft</h2><p class="fine">Editable working note only. It is not addressed or sent to a business. Human review and separate authorization are required before any real-world contact.</p><textarea id="draftText" class="draft" aria-label="Editable internal draft"></textarea><div class="draft-actions" style="margin-top:10px"><button id="copyBtn" class="quiet" type="button">Copy draft</button><button id="reviewBtn" class="secondary" type="button">Mark reviewed (local demo)</button><button id="closeDraftBtn" class="quiet" type="button">Close</button></div><p id="reviewState" class="review-state" role="status" aria-live="polite">Not reviewed · No action taken.</p></section></main><footer>EAGLE EYE · STATIC DEMO · NO REAL-DATA CONNECTIONS · NO OUTBOUND ACTIONS</footer></div><div id="toast" class="toast hidden" role="status" aria-live="polite"></div>
+<script>
+const profiles={hvac:{name:'HVAC & Climate Control',tickets:[350,550],leads:[20,36],recover:[.08,.16],signal:'Illustrative peak-season missed-call and delayed-response pattern.',checks:{impact:75,evidence:35,action:80}},plumbing:{name:'Plumbing & Emergency Services',tickets:[280,480],leads:[24,42],recover:[.07,.14],signal:'Illustrative emergency-call coverage gap pattern.',checks:{impact:72,evidence:32,action:86}},roofing:{name:'Roofing Repair',tickets:[900,1600],leads:[10,22],recover:[.05,.12],signal:'Illustrative estimate-request follow-up delay pattern.',checks:{impact:82,evidence:30,action:68}}};const regions={'Phoenix, AZ':{factor:1.08,season:'Seasonal demand multiplier: 1.08 (synthetic preset)'},'Miami, FL':{factor:1.12,season:'Seasonal demand multiplier: 1.12 (synthetic preset)'},'Houston, TX':{factor:1,season:'Seasonal demand multiplier: 1.00 (synthetic preset)'}};const $=id=>document.getElementById(id);let current=null;const money=n=>'$'+Math.round(n).toLocaleString('en-US');function closePanels(){$('verifyPanel').classList.add('hidden');$('actPanel').classList.add('hidden')}
+function buildScenario(){const region=$('locationSelect').value,p=profiles[$('sectorSelect').value],r=regions[region];current={region,p,r};closePanels();$('opportunityCard').classList.add('hidden');$('scanBtn').disabled=true;$('scanningState').classList.remove('hidden');window.setTimeout(()=>{const low=p.leads[0]*p.tickets[0]*p.recover[0]*r.factor,high=p.leads[1]*p.tickets[1]*p.recover[1]*r.factor,s=p.checks,total=Math.round(s.impact*.4+s.evidence*.35+s.action*.25);$('cardLocation').textContent=region;$('cardSector').textContent=p.name;$('riskValue').textContent=money(low)+'–'+money(high);$('riskNote').textContent='Illustrative range per month · assumption-driven, not observed revenue';$('estimateExplanation').innerHTML=`<ul class="math"><li><strong>Scenario formula:</strong> lead opportunities × assumed ticket × assumed recoverable share × regional multiplier.</li><li>${p.leads[0]}–${p.leads[1]} hypothetical leads/month × ${money(p.tickets[0])}–${money(p.tickets[1])} assumed ticket × ${(p.recover[0]*100).toFixed(0)}–${(p.recover[1]*100).toFixed(0)}% recoverable × ${r.factor.toFixed(2)} multiplier.</li><li>${r.season}</li><li class="fine">Range is not a validated estimate, revenue loss, or promise of recovery. Assumptions are fixed demo presets and do not vary with live market data.</li></ul>`;$('confidenceScore').textContent=total+' / 100';$('scoreExplanation').innerHTML=`<div class="scoreline"><span>Illustrative impact</span><span class="score">${s.impact}/100 × 40%</span></div><div class="scoreline"><span>Evidence readiness (demo baseline)</span><span class="score">${s.evidence}/100 × 35%</span></div><div class="scoreline"><span>Actionability (demo baseline)</span><span class="score">${s.action}/100 × 25%</span></div><p class="fine" style="margin-bottom:0">Weighted arithmetic only. Scores are synthetic prioritization placeholders—not confidence, accuracy, or proof.</p>`;$('evidenceText').textContent=p.signal+' This is a scenario prompt, not an observed signal.';$('scanningState').classList.add('hidden');$('scanBtn').disabled=false;$('opportunityCard').classList.remove('hidden');$('opportunityCard').scrollIntoView({behavior:'smooth',block:'start'})},350)}
+function updateChecks(){const n=document.querySelectorAll('.evidenceCheck:checked').length;$('checkSummary').textContent=`${n} of 4 review checks complete · Status remains UNVERIFIED.`}function prepareDraft(){if(!current)return;const p=current.p;$('draftText').value=`INTERNAL REVIEW NOTE — DEMO ONLY\n\nScenario: ${p.name} · ${current.region}\nSynthetic modeled range: ${$('riskValue').textContent} / month (assumptions only; not verified).\n\nSuggested next step: Identify an approved, privacy-appropriate source to validate whether a response-time or follow-up issue exists. Record source, date, scope, and uncertainty. Do not contact the business without separate human approval.\n\nNo message prepared for sending. No external action taken.`;$('reviewState').textContent='Not reviewed · No action taken.';$('reviewState').classList.remove('done');$('verifyPanel').classList.add('hidden');$('actPanel').classList.remove('hidden');$('actPanel').scrollIntoView({behavior:'smooth',block:'start'})}function toast(m){$('toast').textContent=m;$('toast').classList.remove('hidden');setTimeout(()=>$('toast').classList.add('hidden'),2200)}
+$('scanBtn').addEventListener('click',buildScenario);$('verifyBtn').addEventListener('click',()=>{$('actPanel').classList.add('hidden');$('verifyPanel').classList.toggle('hidden');if(!$('verifyPanel').classList.contains('hidden'))$('verifyPanel').scrollIntoView({behavior:'smooth',block:'start'})});$('draftBtn').addEventListener('click',prepareDraft);document.querySelectorAll('.evidenceCheck').forEach(el=>el.addEventListener('change',updateChecks));$('copyBtn').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('draftText').value);toast('Copied locally. Nothing was sent.')}catch{$('draftText').select();toast('Select and copy the draft manually. Nothing was sent.')}});$('reviewBtn').addEventListener('click',()=>{$('reviewState').textContent='Marked reviewed in this page only · No external action taken.';$('reviewState').classList.add('done')});$('closeDraftBtn').addEventListener('click',()=>$('actPanel').classList.add('hidden'));
+</script></body></html>
