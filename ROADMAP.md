@@ -4,7 +4,7 @@ This roadmap separates the shipped static-product foundation from future product
 
 ## Current milestone — Phase 3 product/workflow foundation
 
-The existing one-page GitHub Pages app now has an opportunity contract, evidence-first dossier, heuristic-score explanation, data-readiness separation, leakage taxonomy, local session pipeline and audit-style timeline, a six-language command center, and a synchronized synthetic opportunity map. This is a UI and architecture prototype only; it does not demonstrate that leakage exists or that a business can recover money. The Phase 3 changes must still be committed and the exact Pages deployment verified before they are called live.
+The existing one-page GitHub Pages app now has an opportunity contract, evidence-first dossier, heuristic-score explanation, data-readiness separation, leakage taxonomy, local session pipeline and timeline, a six-language command center, and a synchronized synthetic opportunity map. Phase 3 was deployed at `016aab34e543d566ced34d88535294f9650220d1`; its Pages workflow succeeded and the live page was checked. This is a UI and architecture prototype only; it does not demonstrate that leakage exists or that a business can recover money.
 
 ## Highest-value next work (ranked)
 

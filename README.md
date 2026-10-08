@@ -8,8 +8,7 @@ Eagle Eye is an evolving **static opportunity-intelligence prototype**. Phase 3 
 - Repository: <https://github.com/elmalik490/eagle-eye-radar>
 - Default branch: `main`
 - Deployment: `.github/workflows/pages.yml` publishes the repository root on pushes to `main` and manual dispatch.
-
-The Phase 3 working tree remains uncommitted until final review. The currently public site is the prior deployed static version until its new commit is pushed and Pages deployment is confirmed.
+- Phase 3 deployment: verified at commit `016aab34e543d566ced34d88535294f9650220d1`; the Pages Action completed successfully, and the public page and new modules returned HTTP 200.
 
 ## Current demo capabilities
 
@@ -26,7 +25,7 @@ The Phase 3 working tree remains uncommitted until final review. The currently p
 
 ## DEMO / SYNTHETIC versus real behavior
 
-All nine opportunity records, IDs, signals, scores, priorities, dollar ranges, assumptions, provenance, evidence placeholders, risk labels, city anchors/map overlays and workflow events are synthetic or local UI state. There is no connected real-data source. The basemap can show real streets/place labels when the visitor opts into OSM tiles, but it does not validate the demo layer.
+All nine opportunity records, IDs, signals, scores, priorities, dollar ranges, assumptions, provenance, evidence placeholders, risk labels, leakage category example counts, map anchors/overlays and workflow events are synthetic or local UI state. There is no connected real-data source. The basemap can show real streets/place labels when the visitor opts into OSM tiles, but it does not validate the demo layer.
 
 The priority score is a deterministic demo heuristic: synthetic demand (35%), illustrative scenario scale (40%) and synthetic urgency (25%). Evidence quality is deliberately separate and **not assessed**, because no evidence is connected. The score is not a probability, validated forecast, verified exposure, or recoverable revenue. The value range is a monthly illustrative scenario built from visible hypothetical assumptions—not business performance data.
 
@@ -42,17 +41,7 @@ Open <http://localhost:8080>. The page, styles, modules and Leaflet library are 
 
 ## Main files
 
-- `index.html` — retained single-page entry point and semantic UI.
-- `css/app.css` — responsive design system and RTL/mobile layout.
-- `js/app.js` — UI orchestration, search/filters, dossier, local workflow/history and internal draft.
-- `js/demo-data.js` — fictional fixtures and city-level map anchors.
-- `js/opportunity-contract.js` — versioned adapter from fixture to opportunity contract.
-- `js/scoring.js` — illustrative ranges and explainable demo heuristic.
-- `js/demo-workflow.js` — session-local stages and event timeline.
-- `js/i18n.js` — six-language interface dictionary and RTL behavior.
-- `js/map-view.js` — optional Leaflet adapter and synthetic overlays.
-- `vendor/leaflet/` — local Leaflet 1.9.4 files and license.
-- `DATA_MODEL.md`, `PHASE3_PLAN.md`, `PROJECT_STATUS.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `KNOWN_ISSUES.md`, `CHANGELOG.md`, `HANDOVER.md` — data shape and project status.
+`index.html` remains the entry point; `css/app.css` owns the responsive and RTL design; `js/app.js` handles UI orchestration, search, dossier and local workflow; `js/demo-data.js` holds fictional fixtures; `js/opportunity-contract.js` normalizes the demo fixture; `js/scoring.js` calculates illustrative ranges and heuristic priority; `js/demo-workflow.js` owns session-only stages/events; `js/i18n.js` provides six-language strings; and `js/map-view.js` adapts Leaflet and synthetic overlays. `vendor/leaflet/` contains local Leaflet 1.9.4 files and license. [`DATA_MODEL.md`](DATA_MODEL.md), [`PHASE3_PLAN.md`](PHASE3_PLAN.md), and the status/architecture/roadmap/limitations/changelog/handover documents record scope and state.
 
 ## Explicit boundaries
 
