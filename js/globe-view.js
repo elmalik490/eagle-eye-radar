@@ -154,7 +154,7 @@ export class WorldGlobe{
   setView(view,{cityId=null,regionId=null,countryCode=null}={}){
     if(!this.earth||!this.camera)return;this.view=view;
     if(view==='world'){
-      this.earthGroup.rotation.set(.12,-1.42,0);this.camera.position.z=3.45;return;
+      this.earthGroup.rotation.set(.12,-1.42,0);this.camera.position.z=window.innerWidth<768?4.7:3.45;return;
     }
     let city=cities.find(item=>item.id===cityId);
     if(view==='region')city=cities.find(item=>item.regionId===regionId)||city;
@@ -192,6 +192,7 @@ export class WorldGlobe{
   resize(){
     if(!this.renderer||!this.camera||!this.container)return;
     const width=this.container.clientWidth,height=this.container.clientHeight;if(width<2||height<2)return;
+    if(this.view==='world')this.camera.position.z=width<768?4.7:3.45;
     const base=width<768?1.2:1.55,ratio=this.degraded?Math.min(window.devicePixelRatio||1,1):Math.min(window.devicePixelRatio||1,base);
     this.renderer.setPixelRatio(ratio);this.renderer.setSize(width,height,false);this.camera.aspect=width/height;this.camera.updateProjectionMatrix();
   }

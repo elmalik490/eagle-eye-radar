@@ -13,7 +13,7 @@ let filtered=[];
 let history=[];
 let mapController=null;
 let globeController=null;
-let visualMode='map';
+let visualMode='globe';
 let globeStatusCode='ready';
 let mapView='world';
 let mobileDossierOpen=false;
@@ -109,12 +109,8 @@ function renderDossier(){
   const claimKeys={FACT:'claimFact',VERIFIED:'claimVerified',LIKELY:'claimLikely',HYPOTHESIS:'claimHypothesis',UNVERIFIED:'claimUnverified',CONFLICTING:'claimConflicting'};
   const claims=(contract.evidence.claims||[]).map(claim=>`<span class="claim-chip" data-state="${esc(claim.state)}">${esc(t[claimKeys[claim.state]]||claim.state)}</span>`).join('');
   const stateLegend=`<details class="epistemic-legend"><summary>${esc(t.claimLegendTitle)}</summary><p>${esc(t.claimLegendHint)}</p><div class="epistemic-chips">${Object.entries(claimKeys).map(([state,key])=>`<span class="epistemic-chip" data-state="${state}">${esc(t[key])}</span>`).join('')}</div></details>`;
-  const top=`<div class="dossier-top"><div><h2>${esc(t.revenueLeakagePotential)}</h2><p>${esc(cityName(city))}, ${esc(countryName(city))} · ${esc(regionName(city.regionId))} · ${esc(typeName(record.type))}</p></div><span class="badge">${esc(t.syntheticIntelligence)}</span></div>`;
-  const identity=`<div class="dossier-metadata">${metric(t.opportunityId,`<code>${esc(record.id)}</code>`)}${metric(t.sector,esc(sectorName(record.sector)))}${metric(t.evidence,`<span class="badge red">${esc(t.unverified)}</span>`)}${metric(t.claimStates,`<div class="claim-chips">${claims||esc(t.notAssessed)}</div>`)}${metric(t.confidenceNotAssessed,esc(t.notAssessed))}</div>`;
-  const summary=`<div class="dossier-callout">${esc(signal.problem[lang])}</div><p><strong>${esc(t.signalNotProof)}</strong> · ${esc(t.unverified)}</p>`;
+  const top=`<div class="dossier-top"><span class="badge">${esc(t.syntheticIntelligence)}</span><span class="signal-type-chip" data-signal="${esc(record.type)}">${esc(typeName(record.type))}</span></div>`;
   const why=`<p>${esc(signal.why[lang])}</p><p>${esc(signal.whyNow[lang])}</p><p class="formula">${esc(t.generalTrendOnly)}</p>`;
-  const ai=`<p>${esc(t.aiNotConnected)}</p><p>${esc(t.hypotheticalRecoveryText)}</p>`;
-  const blueprint=`<ol class="blueprint-list"><li>${esc(t.blueprintDetect)}</li><li>${esc(t.blueprintRecover)}</li><li>${esc(t.blueprintMeasure)}</li></ol>`;
   const assumptions=contract.valueScenario.assumptions;
   const value=`<div class="value-range">${esc(money(contract.valueScenario.low,lang))} – ${esc(money(contract.valueScenario.high,lang))}</div><p class="formula">${esc(t.monthly)} · ${esc(t.scenarioAssumptions)}</p><details class="scenario-assumptions"><summary>${esc(t.scenarioFormula)}</summary><div class="kv-grid compact">${metric(t.hypotheticalLeads,`${assumptions.prospects[0]}–${assumptions.prospects[1]}`)}${metric(t.ticketPerJob,`${money(assumptions.ticket[0],lang)}–${money(assumptions.ticket[1],lang)}`)}${metric(t.assumedRecoverable,`${Math.round(assumptions.recoverableShare[0]*100)}–${Math.round(assumptions.recoverableShare[1]*100)}%`)}<p class="formula">${esc(t.scenarioFormulaText)}</p></div></details>`;
   const dimensionBars=Object.entries(scored.dimensions).map(([key,value])=>`<div><div class="score-bar-head"><span>${esc(t[scoreLabels[key]])}</span><span>${value}/100</span></div><div class="track"><div class="fill" style="width:${value}%"></div></div></div>`).join('');
@@ -122,7 +118,13 @@ function renderDossier(){
   const evidence=`<p>${esc(signal.evidence[lang])}</p><div class="dossier-callout"><strong>${esc(t.evidenceQuestion)}</strong><p>${esc(t.evidenceQuestionText)}</p></div>${stateLegend}`;
   const provenance=`<div class="dossier-metadata">${metric(t.sourceLabel,esc(t.syntheticSource))}${metric(t.coverage,esc(t.coverageGlobal))}${metric(t.freshness,esc(t.noObservedTime))}${metric(t.reliability,esc(t.notAssessed))}</div>`;
   const action=`<p>${esc(signal.action[lang])}</p><p class="formula">${esc(t.reviewAgainstAuthorizedEvidence)}</p><p class="no-send-note">${esc(t.requiresHumanApproval)}</p>`;
-  root.innerHTML=`<div class="dossier-record">${top}${section(t.dossierSignalLocation,identity)}${section(t.problem,summary)}${section(t.whyNow,why)}${section(t.hypotheticalRecoveryWorkflow,ai)}${section(t.businessBlueprint,blueprint)}${section(t.estimatedValue,value)}${section(t.priorityScore,priority)}${section(t.evidence,evidence)}${section(t.sourceProvenance,provenance)}${section(t.recommendedAction,action)}</div>`;
+  const location=`<div class="signal-location"><strong>${esc(typeName(record.type))}</strong><span>${esc(cityName(city))}, ${esc(countryName(city))} · ${esc(regionName(city.regionId))}</span><small>${esc(record.id)} · ${esc(sectorName(record.sector))}</small></div>`;
+  const problemCard=section(t.problem,`<p>${esc(signal.problem[lang])}</p><p class="formula">${esc(t.signalNotProof)} · ${esc(t.unverified)}</p>`);
+  const aiCopy={en:'An AI-assisted queue can flag stalled follow-ups, group duplicate requests, and suggest a next step; n8n can route the draft for human review. Nothing is sent automatically.',fr:'Une file assistée par IA peut repérer les suivis en retard, regrouper les demandes en double et suggérer une étape ; n8n peut transmettre le brouillon à un humain. Aucun envoi automatique.',ar:'يمكن لقائمة انتظار مدعومة بالذكاء الاصطناعي رصد المتابعات المتأخرة وتجميع الطلبات المكررة واقتراح الخطوة التالية؛ ويمكن لـ n8n توجيه المسودة للمراجعة البشرية. لا يُرسل شيء تلقائيًا.',ru:'Очередь с поддержкой ИИ может выявлять задержанные последующие действия, объединять дубликаты и предлагать следующий шаг; n8n направит черновик человеку. Автоматическая отправка отключена.',zh:'AI 辅助队列可标记延迟跟进、合并重复请求并建议下一步；n8n 可将草稿转交人工审核。不会自动发送任何内容。',ko:'AI 지원 대기열은 지연된 후속 조치를 표시하고 중복 요청을 묶어 다음 단계를 제안할 수 있으며, n8n은 초안을 사람에게 검토하도록 전달합니다. 자동 발송은 하지 않습니다.'};
+  const aiCard=section(t.aiLeverage,`<p>${esc(aiCopy[lang]||aiCopy.en)}</p><p class="formula">${esc(t.aiNotConnected)}</p>`);
+  const blueprintCard=section(t.businessBlueprint,`<ol class="blueprint-list"><li>${esc(t.blueprintDetect)}</li><li>${esc(t.blueprintVerify)}</li><li>${esc(t.blueprintSolve)}</li></ol>`);
+  const more=`<details class="dossier-more"><summary>${esc(t.evidence)} · ${esc(t.estimatedValue)} · ${esc(t.priorityScore)}</summary><div>${section(t.whyNow,why)}${section(t.estimatedValue,value)}${section(t.priorityScore,priority)}${section(t.evidence,evidence)}${section(t.sourceProvenance,provenance)}${section(t.recommendedAction,action)}</div></details>`;
+  root.innerHTML=`<div class="dossier-record">${top}${section(t.signal,location)}${problemCard}${aiCard}${blueprintCard}${more}</div>`;
   $('selectedPreviewText').textContent=`${cityName(city)} · ${typeName(record.type)} · ${scored.score}/100 · ${t.unverified}`;
   document.querySelectorAll('.evidence-check').forEach((input,index)=>{input.checked=checks.has(index);});
   updateCheckProgress();
@@ -171,6 +173,9 @@ function renderAll(){
   filtered=filteredRecords();
   if(!filtered.some(record=>record.id===selectedId))selectedId=filtered[0]?.id||null;
   renderSummary();renderList();renderDossier();renderPipeline();renderHistory();
+  const activeRecord=demoRecords.find(record=>record.id===selectedId);
+  $('mapShell').dataset.activeSignal=activeRecord?.type||'missedDemand';
+  document.querySelector('.radar-grid').dataset.activeSignal=activeRecord?.type||'missedDemand';
   mapController?.render(filtered,selectedId);
   globeController?.render(filtered,selectedId);
 }
@@ -204,7 +209,7 @@ function toggleDrawer(open){
   if(open)setTimeout(()=>$('searchFilter').focus(),40);else button.focus({preventScroll:true});
 }
 function syncFilterDrawerLayout(){
-  const drawer=$('filterDrawer'),button=$('filtersToggle'),backdrop=$('filterBackdrop'),mobile=window.matchMedia('(max-width: 900px)').matches;
+  const drawer=$('filterDrawer'),button=$('filtersToggle'),backdrop=$('filterBackdrop'),mobile=window.matchMedia('(max-width: 1600px)').matches;
   if(!mobile){drawer.classList.remove('open');drawer.setAttribute('aria-hidden','false');drawer.inert=false;button.setAttribute('aria-expanded','false');backdrop.hidden=true;return;}
   const open=drawer.classList.contains('open');drawer.setAttribute('aria-hidden',String(!open));drawer.inert=!open;button.setAttribute('aria-expanded',String(open));backdrop.hidden=!open;
 }

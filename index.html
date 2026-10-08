@@ -70,8 +70,8 @@
 	        <div class="radar-grid">
 	          <section class="map-panel panel" aria-labelledby="mapTitle">
             <div class="map-head"><div><h2 id="mapTitle" data-i18n="mapTitle">World Radar</h2><p data-i18n="mapSub">Real world geography · synthetic city-level examples</p></div><span id="mapCount" class="map-count">13 · DEMO</span></div>
-	            <div class="lifecycle-hud" role="group" aria-label="Recovery lifecycle · illustrative only" data-i18n-aria="lifecycleAria">
-              <div class="lifecycle-heading"><span data-i18n="lifecycleTitle">RECOVERY LIFECYCLE · ILLUSTRATIVE ONLY</span><span class="badge" data-i18n="syntheticIntelligence">DEMO / SYNTHETIC INTELLIGENCE</span></div>
+	            <details class="lifecycle-hud">
+              <summary class="lifecycle-heading"><span data-i18n="lifecycleTitle">RECOVERY LIFECYCLE · ILLUSTRATIVE ONLY</span><span class="badge" data-i18n="syntheticIntelligence">DEMO / SYNTHETIC INTELLIGENCE</span></summary>
 	              <ol class="lifecycle-steps">
 	                <li data-step="signal" data-state="demo"><b>01</b><span data-i18n="lifeSignal">SIGNAL</span><small data-i18n="lifeDemo">DEMO</small></li>
 	                <li data-step="verify" data-state="unverified"><b>02</b><span data-i18n="lifeVerify">VERIFY</span><small data-i18n="unverified">UNVERIFIED</small></li>
@@ -80,8 +80,8 @@
 	                <li data-step="decide" data-state="pending"><b>05</b><span data-i18n="lifeDecide">DECIDE</span><small data-i18n="lifePending">PENDING</small></li>
 	                <li data-step="execute" data-state="disabled" aria-disabled="true"><b>06</b><span data-i18n="lifeExecute">EXECUTE</span><small data-i18n="lifeDisabled">DISABLED</small></li>
 	              </ol>
-	            </div>
-	            <div class="map-shell" id="mapShell" data-visual="map">
+			    </details>
+			    <div class="map-shell" id="mapShell" data-visual="map">
 	              <div id="globeStage" class="globe-stage" role="group" aria-label="Interactive 3D globe with synthetic city markers" data-i18n-aria="globeAria" aria-hidden="true">
 	                <div id="globeCanvasHost" class="globe-canvas-host"></div>
                 <span class="globe-demo-tag" data-i18n="syntheticIntelligence">DEMO / SYNTHETIC INTELLIGENCE</span>
@@ -110,13 +110,13 @@
           <aside id="dossier" class="panel dossier-panel" aria-labelledby="dossierTitle" aria-hidden="false">
             <div class="section-head dossier-heading"><div><h2 id="dossierTitle" data-i18n="dossierTitle">Signal dossier</h2><p data-i18n="dossierPrompt">Select a synthetic marker or list item to inspect the example.</p></div><span class="badge red" data-i18n="unverified">UNVERIFIED</span></div>
             <div id="dossierContent"></div>
-            <section id="reviewSection" class="review-section" aria-labelledby="reviewTitle"><div class="section-head"><div><h3 id="reviewTitle" data-i18n="checklist">Review evidence checklist</h3><p data-i18n="verifyHint">The checklist supports human review only; checks never change UNVERIFIED status.</p></div></div><span class="badge red" data-i18n="unverified">UNVERIFIED</span>
+            <details id="reviewSection" class="review-section"><summary id="reviewTitle" data-i18n="checklist">Review evidence checklist</summary><p class="review-hint" data-i18n="verifyHint">The checklist supports human review only; checks never change UNVERIFIED status.</p><span class="badge red" data-i18n="unverified">UNVERIFIED</span>
               <ul class="check-list"><li><label><input type="checkbox" class="evidence-check"><span data-i18n="checkSource">Authorized primary source and timestamp recorded</span></label></li><li><label><input type="checkbox" class="evidence-check"><span data-i18n="checkSecondSignal">Independent corroborating signal reviewed</span></label></li><li><label><input type="checkbox" class="evidence-check"><span data-i18n="checkScope">Population, time window, and denominator defined</span></label></li><li><label><input type="checkbox" class="evidence-check"><span data-i18n="checkPermission">Access and consent requirements satisfied</span></label></li></ul>
               <p id="checkProgress" class="formula" aria-live="polite">0 <span data-i18n="checklistProgress">review checks complete · status remains UNVERIFIED</span></p>
               <button id="prepareDraft" class="button secondary" type="button" data-i18n="draft">Prepare internal draft</button>
               <div id="draftPanel" class="draft-panel" hidden><h3 data-i18n="draftTitle">Internal next-step draft</h3><p class="formula" data-i18n="draftHint">Editable internal note only. No message is addressed or sent.</p><label class="sr-only" for="draftText" data-i18n="draftAria">Editable internal draft</label><textarea id="draftText" class="draft-text" data-i18n-aria="draftAria"></textarea><div class="action-row"><button id="copyDraft" class="button tiny" type="button" data-i18n="copy">Copy note</button><button id="markReviewed" class="button tiny secondary" type="button" data-i18n="reviewed">Mark reviewed locally</button><button id="closeDraft" class="button tiny" type="button" data-i18n="close">Close</button></div><p id="reviewState" class="formula" data-i18n="notReviewed">Not reviewed · no action taken.</p></div>
               <p class="no-send-note" data-i18n="noSend">No external messages, CRM writes, payments, or actions are enabled.</p>
-            </section>
+            </details>
             <div id="dossierWorkflow" class="dossier-workflow"></div>
             <div class="audit-panel"><h3 data-i18n="activityTimeline">LOCAL AUDIT TIMELINE</h3><ol id="workflowTimeline" class="audit-timeline"></ol></div>
           </aside>
