@@ -1,52 +1,25 @@
 # Eagle Eye — Handover
 
-**Handover type:** Documentation-only checkpoint for the existing public v0.1 project.
-
-**Product state:** Static demo is live; it is not a real-data or production system.
-
-## Repository and deployed source
-
-- Repository: <https://github.com/elmalik490/eagle-eye-radar>
-- Branch: `main`
-- Live site: <https://elmalik490.github.io/eagle-eye-radar/>
-- Product-code baseline: `87b73085c07161d5a87e680d06f43dc9136a9bc3`.
-- The `docs: finalize Eagle Eye handover and project state` checkpoint is documentation-only and becomes the latest `main` commit; its exact SHA is available in the GitHub commit history.
-- The prior Pages deployment completed successfully for that baseline. The documentation checkpoint adds only sanitized Markdown; `index.html` and `.github/workflows/pages.yml` are preserved unchanged. The Pages workflow runs on every push to `main`; verify the run for the documentation commit after push.
+**Current state:** improved static prototype in the existing `elmalik490/eagle-eye-radar` repository. This continuation began from commit `dea3bc609f976ab7f153e7e9e9dd47141d0eb325` on `main`; the existing GitHub Pages deployment structure is preserved. The implementation changes are ready for a commit/push and public deployment verification.
 
 ## What is present
 
-- `index.html`: one-page UI with location/sector selectors, synthetic scan card, Verify panel, and Act/Draft panel.
-- `.github/workflows/pages.yml`: static GitHub Pages deployment workflow.
-- `README.md`, `PROJECT_STATUS.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `KNOWN_ISSUES.md`, `CHANGELOG.md`, and this file: sanitized project and handover documentation.
+`index.html` remains the entry point. The application is split across `css/app.css`, `js/app.js`, `js/demo-data.js`, `js/scoring.js`, `js/i18n.js`, and `js/map-view.js`; Leaflet 1.9.4 is locally included under `vendor/leaflet/` with its license. `.github/workflows/pages.yml` continues to deploy the repository root. See [ARCHITECTURE.md](ARCHITECTURE.md) for module responsibility and [README.md](README.md) for operation.
 
-## Verified live behavior
+The interface includes responsive search/filters, six languages with Arabic RTL, synthetic opportunity cards and scoring explanations, opt-in map loading and OSM attribution, a checklist that stays unverified, and an editable local-only internal note. None of the fixtures describe real businesses or observed revenue loss. Map circles and city anchors are synthetic overlays, not business location data.
 
-On 2026-10-07 UTC, all three manual browser smoke flows passed:
+## Local verification completed
 
-- Phoenix + HVAC: scan card appeared; Verify and Act opened; the approval control produced only the local demo alert saying no external messages were sent.
-- Miami + Plumbing: scan card appeared with the corresponding hard-coded synthetic values.
-- Houston + Roofing: scan card appeared with the corresponding hard-coded synthetic values.
+Chromium/Playwright reported no horizontal overflow at 360, 390, 430, 768, 1024, 1280, and 1440 pixels and no JavaScript page exceptions in the measured flows. All six UI translation dictionaries contained all rendered interface keys. Filtering to Miami/Roofing returned one scenario. Arabic RTL and the Arabic draft were checked. No OSM tile request occurred before the person selected the visible map-load action; afterwards all three city-centroid markers rendered, marker selection updated the dossier, the World control and overlays worked, and the mapped test requested eight visible tiles. Checklist interaction did not change `UNVERIFIED`. There is no committed browser-test suite yet.
 
-All cards retained `DEMO / SYNTHETIC` and `UNVERIFIED`; no JavaScript errors or monitored `fetch`, XHR, or `sendBeacon` calls were observed during the test interactions. There is no committed automated test suite.
+## Deployment next step
 
-## Decisions already made
+1. Review and commit the current working tree to `main`.
+2. Push the authorized repository update; GitHub Actions will run the existing Pages workflow.
+3. Confirm that the run succeeded for the exact commit and that the live URL serves the new HTML, JavaScript, CSS and vendor assets. Until that live check succeeds, describe the local build as tested but do not claim the public deployment has been verified.
 
-- Keep v0.1 as the existing static prototype; this checkpoint does not redesign or add product features.
-- Treat all displayed opportunity data as synthetic and unverified.
-- Do not add APIs, backend services, SMS, voice, payments, a 3D globe, or real-data claims in this checkpoint.
-- Do not send outreach. Human approval is required for any future external communication.
-- Keep commercial-validation data private and out of the public repository.
+No migration or build step is needed. Run `python3 -m http.server 8080` in the repository to preview locally. Use the map-load control to test optional OSM tiles.
 
-## Private work boundary
+## Safety and privacy boundaries
 
-A private commercial-validation batch exists outside GitHub and is not part of this public repository. This file intentionally contains no prospect identities, contacts, private sources, spreadsheet content, or links to private materials. Any transfer or access for another account must be arranged separately through a private, approved channel; do not assume it is included in this repository.
-
-## Safest next steps
-
-1. Verify the documentation commit on `main` and the associated Pages workflow result.
-2. Have the receiving account verify repository and live-site access.
-3. Arrange separate private access only if the private validation material is needed.
-4. Stop at this checkpoint. Wait for a new, explicit scope before changing the product or conducting outreach.
-
-## Active implementation continuation — 2026-10-08
-The owner explicitly authorized continuation and implementation of the existing v0.1 project; this section supersedes the earlier checkpoint-only next-step instruction above. Current changes preserve the static page and Pages workflow while adding transparent synthetic scenario arithmetic, sector-specific presets, human-led review checklist, and local-only editable draft. No real source, backend, or external communication is introduced. See `IMPLEMENTATION_PLAN.md`, `PROJECT_STATUS.md`, `CHANGELOG.md`, and `KNOWN_ISSUES.md` for the current state. Private validation materials remain excluded.
+The app has no backend, real-data connector, business discovery, verified evidence, durable approval, CRM, external send capability, billing or payment. No prospect was contacted and no external irreversible action was taken. The private commercial-validation materials remain outside this public repository; do not add prospect identities, contact details, private research or private spreadsheet contents here. Any future outreach or consequential external action needs its own explicit authorization and an approved private workflow.

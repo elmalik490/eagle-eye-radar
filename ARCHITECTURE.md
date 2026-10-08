@@ -1,41 +1,32 @@
 # Architecture
 
-## Current architecture
+## Current: client-side static prototype
 
-Eagle Eye v0.1 is a static single-page prototype. It has no application build system, server, backend, database, API integration, or external action service.
+GitHub Pages serves the repository root; there is no application server or build step. The existing single-page `index.html` remains the entry point. It links to self-contained CSS, ES modules and a local Leaflet bundle. UI state is held in memory for the page session, and the selected interface language is held in local browser storage.
 
 ```text
-Browser
-  ├─ index.html: structure, inline styles, inline JavaScript
-  ├─ Tailwind CSS: loaded from the public CDN at runtime
-  └─ In-page DOM state: selectors, scan card, Verify panel, Act/Draft panel
+index.html
+  ├─ css/app.css                 responsive UI, breakpoints, RTL, Leaflet styles
+  ├─ js/app.js                   UI composition, filters, dossier, local review/draft
+  ├─ js/demo-data.js             fictional records, sectors, city anchor coordinates
+  ├─ js/scoring.js               transparent scenario arithmetic and heuristic score
+  ├─ js/i18n.js                  UI text for en/fr/ar/ru/zh/ko and RTL
+  ├─ js/map-view.js              optional Leaflet adapter and demo-only overlays
+  └─ vendor/leaflet/             local Leaflet 1.9.4 JavaScript/CSS, images, license
 
-GitHub main push / manual dispatch
-  └─ .github/workflows/pages.yml
-       ├─ checkout repository
-       ├─ configure GitHub Pages
-       ├─ upload repository root as Pages artifact
-       └─ deploy artifact to GitHub Pages
+GitHub Actions
+  └─ .github/workflows/pages.yml → publish repository root to GitHub Pages
 ```
 
-## UI behavior and data
+### Responsibilities and behavior
 
-- The two `<select>` controls provide three locations and three sectors. JavaScript reads their values when `runScan()` runs.
-- `runScan()` hides prior panels, shows a scan indicator, waits 1.2 seconds, then fills and reveals the opportunity card.
-- The displayed revenue-risk and confidence values are hard-coded by location only: Phoenix `$14,200 / mo` and `80%`; Miami `$18,500 / mo` and `85%`; Houston `$11,000 / mo` and `75%`.
-- Sector is displayed on the card but does not affect those values. Evidence text and verification details are static placeholder copy.
-- `toggleVerifyModal()` and `toggleActModal()` only toggle local DOM visibility.
-- The demo approval button invokes a local `alert()` and does not call a message, SMS, voice, payment, or business API.
-- The page visibly marks the opportunity data `DEMO / SYNTHETIC` and its status `UNVERIFIED`.
+- **Synthetic data:** `demo-data.js` builds a small fixed set of fictional city/sector scenarios. City coordinate anchors are geographic display points only; they do not represent business addresses or detected market opportunities.
+- **Scoring and scenario arithmetic:** `scoring.js` computes illustrative ranges from explicit ticket/leads/recovery assumptions, city multipliers and deterministic heuristic dimensions. These calculations are not empirically calibrated, verified financial exposure, forecasts, or claims of recoverable revenue. The UI exposes the score dimensions and keeps the entire result marked synthetic and unverified.
+- **Presentation and workflow:** `app.js` filters/sorts the local records, renders opportunity details, records page-session actions locally, and prepares an editable internal-only draft. The evidence checklist is a human review aid only; ticking boxes never verifies data or changes `UNVERIFIED` status. No outward action is implemented.
+- **Localization:** `i18n.js` handles interface strings, saved language preference, and Arabic right-to-left direction. User-facing controls, map labels and draft guardrails are translated; fictional data remains clearly synthetic.
+- **Map adapter:** `map-view.js` has no role in discovery, scoring, or verification. The locally hosted Leaflet runtime and page assets load without a third-party JavaScript/CSS CDN. Raster tiles are requested from the OpenStreetMap standard tile endpoint only following the user-visible load-map action; attribution is displayed on the map. Tile traffic is handled by the browser, limited to visible tiles, and is not Eagle Eye opportunity or business data. The standard tile endpoint is best-effort—not a production SLA, offline source, or entitlement for high-volume use. Adopt a suitable provider or self-hosted tiles before commercial-scale usage.
+- **Deployment:** `.github/workflows/pages.yml` checks out the repository, configures Pages, uploads the repository root and deploys it on pushes to `main` or manual dispatch. There is no compile or packaging stage.
 
-## Deployment
+## Intentional omissions and future seams
 
-The Pages workflow is configured for the repository root and runs on pushes to `main` or `workflow_dispatch`. It uses GitHub's checkout, Pages configuration, artifact-upload, and deployment actions. There is no compile or packaging stage. The default page is the root `index.html`.
-
-The documentation-only handover commit adds Markdown files at the repository root. It does not change application code or the workflow; because the workflow watches all pushes to `main`, it triggers another deployment of the same static app content.
-
-## Operational implications
-
-- Tailwind styling depends on network access to the public CDN.
-- All demo state is ephemeral and resets on page reload.
-- The synthetic metrics/evidence must not be presented as verified facts about a real company or market.
+There is no connector registry, ingestion API, data normalization pipeline, backend, database, user authentication, organization boundary, source permission model, durable case history, approval/audit record, CRM, analytics telemetry, task queue, scheduler, business lookup or outbound messaging. These are future design seams only—not implemented modules or implied capability. Any future real-data design needs a source/citation model, lawful and authorized access, data quality and retention rules, tenant isolation/security, calibrated scoring and human-reviewed acceptance criteria before coding.

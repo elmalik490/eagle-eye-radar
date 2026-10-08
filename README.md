@@ -1,39 +1,47 @@
-# EAGLE EYE — Opportunity Radar
+# Eagle Eye — Opportunity Radar
 
-Eagle Eye is a **static v0.1 prototype** for demonstrating an opportunity-radar interface. It currently displays synthetic demo values; it does not discover real businesses, verify real operational signals, or recover revenue.
+Eagle Eye is an evolving **static opportunity-intelligence prototype**. The current interface improves the existing v0.1 project; it is not a rebuilt backend product and it does **not** discover real businesses, verify actual revenue leakage, or recover revenue.
 
-## Live prototype
+## Live app and repository
 
 - GitHub Pages: <https://elmalik490.github.io/eagle-eye-radar/>
 - Repository: <https://github.com/elmalik490/eagle-eye-radar>
 - Default branch: `main`
-- Product-code baseline: `87b73085c07161d5a87e680d06f43dc9136a9bc3` (`Deploy Eagle Eye Opportunity Radar v0.1 prototype`)
+- Deployment: `.github/workflows/pages.yml` publishes the repository root on pushes to `main` and on manual dispatch.
 
-## Current state
+## Current demo capabilities
 
-The page is a single `index.html` with location and sector selectors, a scan interaction, an opportunity card, a Verify panel, and an Act/Draft panel. Every displayed opportunity value is explicitly marked `DEMO / SYNTHETIC`; status is `UNVERIFIED`. The approval control is demo-only and does not send a message.
+- Responsive desktop command-center and compact mobile layouts; seven viewport sizes from 360 to 1440 pixels were checked for horizontal overflow.
+- English, French, Arabic (RTL), Russian, Chinese, and Korean interface; language choice stays in local browser storage.
+- Search and filters for location, sector, synthetic signal type and heuristic demo priority; selecting a result updates the detail panel.
+- Optional interactive Leaflet map with World/Country/City views, synthetic city-centroid markers and demo-only overlays. The map library is hosted in this repository. Raster tiles are requested from OpenStreetMap **only after a person selects “Load interactive map.”** Visible OSM attribution and a privacy note are provided.
+- A synthetic, sector-specific scenario value range with a visible assumptions formula; a weighted demo score and dimension breakdown; both are heuristic illustrations only.
+- A human-led evidence checklist that **never** changes a record out of `UNVERIFIED`, plus an editable internal-only draft and local session history.
 
-This is **not production software** and has no backend, database, live data source, CRM integration, real verification pipeline, or external outreach capability. See [PROJECT_STATUS.md](PROJECT_STATUS.md), [ARCHITECTURE.md](ARCHITECTURE.md), [KNOWN_ISSUES.md](KNOWN_ISSUES.md), [ROADMAP.md](ROADMAP.md), and [HANDOVER.md](HANDOVER.md).
+All scenario records, scores, range assumptions, map circles and markers remain `DEMO / SYNTHETIC`; city anchors are not business locations. No live sources or external send capability exist.
 
 ## Run locally
 
-No build step is required. Open `index.html` in a browser, or run a local static server from the repository root:
+No build step is required. From the repository root:
 
 ```bash
 python3 -m http.server 8080
 ```
 
-Then open <http://localhost:8080>. The page loads Tailwind CSS from its public CDN, so styling requires internet access.
+Open <http://localhost:8080>. The page, styles, application modules and Leaflet library are served locally. If the user chooses to load the interactive map, the browser requests visible map tiles from `tile.openstreetmap.org`; the optional standard tile service is best-effort, not a production SLA. OSM attribution is shown in the map.
 
-## Repository contents
+## Main files
 
-- `index.html` — the prototype UI and inline interaction logic.
-- `.github/workflows/pages.yml` — deploys the repository root to GitHub Pages on pushes to `main` and on manual dispatch.
-- Root Markdown files — sanitized project status and handover documentation.
+- `index.html` — existing single-page entry point and semantic UI.
+- `css/app.css` — self-contained responsive design system.
+- `js/app.js` — client-side orchestration, filters, local review and draft flow.
+- `js/demo-data.js` — fictional scenario fixtures and city-level map anchors.
+- `js/scoring.js` — assumption-based ranges and transparent heuristic scoring.
+- `js/i18n.js` — six-language interface dictionary and RTL handling.
+- `js/map-view.js` — optional Leaflet map adapter, city markers and demo overlays.
+- `vendor/leaflet/` — locally hosted Leaflet 1.9.4 files and license.
+- `PHASE2_PLAN.md`, `PROJECT_STATUS.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `KNOWN_ISSUES.md`, `CHANGELOG.md`, `HANDOVER.md` — scope and status documentation.
 
-## Privacy boundary
+## Explicit boundaries
 
-A private commercial-validation batch exists outside this public repository. It is intentionally excluded from GitHub and from these documents. Do not add prospect identities, contact details, private research, or private spreadsheet contents to this public repository.
-
-## Current prototype workflow
-The current UI turns locally selected city/sector presets into a transparent **synthetic scenario**, with an assumption-based range and explicitly heuristic priority score. It includes a human-led evidence checklist (which never verifies the synthetic result) and an editable internal note. It has no real discovery, real verification, backend, CRM, persistence, or outbound messaging. The latest implementation scope and validation summary are documented in `IMPLEMENTATION_PLAN.md`, `PROJECT_STATUS.md`, `CHANGELOG.md`, and `KNOWN_ISSUES.md`.
+No backend, database, real lead discovery, authenticated source access, CRM, persistent review/audit trail, automated execution, customer contact, billing or payment flow is implemented. “Reviewed” is local-only page state, not an approval record. The demo is not commercially or empirically validated. Keep prospect identities, contact information, private research and private commercial-validation materials out of this public repository.

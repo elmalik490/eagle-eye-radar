@@ -1,31 +1,19 @@
 # Known Issues and Limitations
 
-No blocking JavaScript error was observed in the documented live smoke test. The following limitations are intentional/known prototype behavior, not claims of production readiness.
+These are prototype boundaries, not promises of production readiness.
 
-## Synthetic-data limitations
+## Data, commercial and verification boundaries
 
-- Risk values, confidence values, and evidence copy are hard-coded demo content. They are not measurements, predictions, verified incidents, or evidence about real businesses.
-- The card explicitly labels the data `DEMO / SYNTHETIC` and `UNVERIFIED`; preserve those labels unless a separately approved, evidence-backed change replaces the underlying model.
-- All sectors share the same location-based risk/confidence figures. Sector selection currently changes the displayed label only.
+All nine opportunity scenarios, scores, ranges and geographic overlays are generated from local fictional fixtures. They are not observed businesses, leads, incidents, historical revenue, verified leakage, predictions or evidence of recoverable value. The city-level anchors are not business locations. Score weights, ticket sizes, leads, recovery shares and city multipliers are illustrative assumptions and have no validated commercial accuracy. The map's real streets and place labels provide geographic context only; they must not be confused with the synthetic Eagle Eye layer.
 
-## Functional limitations
+The evidence checklist is a prompt for a human-led future review and is not connected to source evidence. Checking a box never verifies a scenario or alters its `UNVERIFIED` status. “Mark reviewed,” the editable note, copy action, filters and session history are client-side page behavior, not an approval/audit record. No external contact, messaging, CRM, automation or persistence is enabled.
 
-- The scan interaction uses a fixed 1.2-second timeout; it does not scan a data source.
-- Verify displays static explanatory text; it does not verify evidence.
-- Act displays a generic HVAC-oriented draft even when another sector is selected.
-- The demo approval button only raises a local alert. There is no external send capability, approval record, persistence, or follow-up workflow.
-- State exists only in the current page session and resets on reload.
-- There is no automated test suite; browser checks are manual smoke tests.
-- Styling uses Tailwind from a public CDN and may be unavailable without internet access.
+## Map dependency
 
-## Handover / documentation limitations
+The locally bundled Leaflet library and other application assets are hosted with this site. If a user deliberately loads the interactive map, visible raster tiles are fetched from `tile.openstreetmap.org`; tile availability, latency and zoom detail depend on that public best-effort service. OSM's standard tile servers are not a production SLA, offline cache, high-volume entitlement, guaranteed service, or recommended basis for commercial scale. Choose a suitable commercial provider or self-hosted infrastructure before relying on the map commercially, and observe the provider's current attribution, caching and usage requirements. This map-tile request is separate from any intelligence data; no Eagle Eye opportunity or business record is sent to the tile provider.
 
-- The private commercial-validation materials are intentionally excluded from this public repository. Transfer or permissions for those materials must be arranged separately if needed by another account.
-- The public repository is not a safe destination for prospect identities, contact details, private research, or private spreadsheet contents.
+## Engineering limits
 
-## Updated prototype behavior — 2026-10-08
-- The prior hard-coded location-only risk and confidence figures were replaced by fixed synthetic sector assumptions, an assumption-based monthly range, and a weighted demo-priority arithmetic. These remain fictional scenario presets, not validated estimates or confidence values.
-- Sector-specific scenario prompt text replaces the earlier generic HVAC-only evidence paragraph; prompts are explicitly not observed signals.
-- The Verify panel is now a human-led checklist. Checking boxes never verifies a business or changes the unverified status; there is no record persistence.
-- The Act panel is now an editable/copyable internal note only. “Mark reviewed” is local page state, not an approval record; nothing is sent.
-- Layout is responsive and no longer depends on Tailwind CDN. Browser compatibility and accessibility have only received prototype smoke testing, not formal audit.
+The page is static and anonymous. It has no source connectors, backend, database, tenant separation, server-side authorization, secrets management, audit/policy enforcement, durable review state, data-retention policy, rate limiting or monitoring. `localStorage` availability depends on the browser. The lightweight tests cover seven viewport sizes and a few flows; there is no committed automated regression suite, formal WCAG audit, performance budget or cross-browser certification. Translation keys are covered for the rendered interface, but content and market-specific localization require human review.
+
+Before any real-data or automated phase, define evidence provenance, lawful/authorized access, privacy and retention, source quality, operational security, tenant boundaries, calibrated scoring, confidence semantics, human approval/audit controls and measurable acceptance criteria. No prospects or private commercial-validation records belong in this public repository.

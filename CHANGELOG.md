@@ -1,23 +1,11 @@
-# Changelog
 
-## 2026-10-08 — Documentation handover checkpoint
 
-- Added sanitized README, project status, architecture, roadmap, known-issues, changelog, and handover documentation.
-- Preserved the existing `index.html` and `.github/workflows/pages.yml` without changes.
-- Re-ran the live browser smoke test for all three requested location/sector flows, Verify, Act, and the local-only approval alert. All checks passed; no JavaScript errors or monitored external send calls were observed.
-- Excluded all private prospect/contact data and private research from the public repository.
-
-## 2026-10-07 — v0.1 static demo prototype
-
-- Added the single-page Opportunity Radar demo and GitHub Pages Actions workflow.
-- Product-code baseline commit: [`87b73085c07161d5a87e680d06f43dc9136a9bc3`](https://github.com/elmalik490/eagle-eye-radar/commit/87b73085c07161d5a87e680d06f43dc9136a9bc3).
-- Published through GitHub Pages; the deployment run recorded success for the product-code baseline.
-- The demo uses synthetic, unverified, hard-coded content. No real data services or outbound communications were added.
-
-## 2026-10-08 — v0.1 workflow and explainability upgrade
-- Preserved the existing static single-page prototype and GitHub Pages deployment; replaced external Tailwind runtime dependency with responsive self-contained CSS.
-- Replaced unsupported revenue-at-risk/confidence claims with synthetic assumption-based monthly scenario ranges and a visible formula.
-- Added sector-specific illustrative assumptions and transparent weighted demo priority score; neither is evidence, forecast, or real opportunity estimate.
-- Added an authorized human evidence-review checklist that leaves the demo status UNVERIFIED, plus editable/copyable internal-only next-step draft and local review state.
-- Improved mobile touch targets, keyboard focus, live status announcements, reduced-motion behavior, and explicit no-data/no-send guardrails.
-- No backend, network data source, business lookup, outbound messaging, or external action was added.
+## 2026-10-08 — Phase 2: command-center UI and map foundation
+- Continued the existing static prototype; preserved the root `index.html` and GitHub Pages Actions workflow, with no framework or backend rebuild.
+- Replaced the narrow mobile-only layout with responsive desktop/mobile command-center views, connected the search/location/sector/signal/priority/unverified filters to synthetic records, and expanded the detail/score explanations.
+- Added six translated UI dictionaries (EN/FR/AR/RTL/RU/ZH/KO), including a translated internal draft guardrail; the scenario fixtures themselves remain synthetic.
+- Added separate local modules for UI orchestration, fictional demo data, scenario scoring, translations, and the Leaflet map adapter. Bundled Leaflet 1.9.4 locally with its license.
+- Added an optional Leaflet map with World/Country/City views, synthetic city-centroid markers, demo-only circles and visible OSM attribution. OSM tiles load only when the visitor selects “Load interactive map”; map motion is non-animated to avoid extra tile requests.
+- Preserved unverified checklist behavior and internal-only draft/history handling; no source integration, business data, API, CRM, outbound action or automation was added.
+- Local Chromium/Playwright checks: seven viewport widths, zero horizontal overflow, no JavaScript page exceptions; all six interface dictionaries complete; Miami/Roofing returns one result; three map markers and layer toggles work; no tile request before explicit load, eight visible OSM tile requests after loading; checking evidence does not verify the record.
+- Public Pages deployment remains pending until the change is committed, pushed and checked against the exact Actions run and live URL.

@@ -1,44 +1,21 @@
 # Project Status
 
-**As of:** 2026-10-08
+**Checked:** 2026-10-08 · **Stage:** Improved static prototype on the existing GitHub Pages architecture (interface v0.2 update to the v0.1 project). This is neither production software nor a validated revenue-recovery product.
 
-**Product stage:** v0.1 static synthetic prototype, publicly deployed; not production and not commercially validated.
+## What is implemented
 
-## Implemented
+The original single-page entry point and Pages deployment model are retained. The UI now has desktop command-center and compact mobile layouts; six translated interfaces (English, French, Arabic RTL, Russian, Chinese and Korean); local search and location/sector/signal/priority/verification filters; sortable opportunity cards and details; explicit sector assumption ranges and heuristic score breakdown; an optional OSM-backed interactive map with three synthetic city anchors and toggleable illustrative overlays; a human evidence checklist; and an editable local-only internal draft/history flow. Local data stays labelled `DEMO / SYNTHETIC` and `UNVERIFIED`.
 
-- One-page `index.html` with location and sector selectors, animated scan state, opportunity card, Verify panel, and Act/Draft panel.
-- GitHub Actions workflow `.github/workflows/pages.yml` deploys the repository root to GitHub Pages on pushes to `main` and manual dispatch.
-- The UI labels the card `DEMO / SYNTHETIC` and `STATUS: UNVERIFIED`.
+Real business discovery, observed evidence, CRM, authentication, APIs, database, persistence/audit trail, automation, public-data ingestion and outbound communication are **not** implemented. The map's real basemap does not turn its synthetic intelligence layer into live business or market data.
 
 ## Current source and deployment
 
-- Product-code baseline commit: `87b73085c07161d5a87e680d06f43dc9136a9bc3` — `Deploy Eagle Eye Opportunity Radar v0.1 prototype`.
-- Product version remains v0.1; the latest `main` change in this checkpoint is documentation-only. Its exact commit SHA is available in the repository history.
-- Prior successful Pages run: [run 37561205421](https://github.com/elmalik490/eagle-eye-radar/actions/runs/37561205421), deploying that same commit.
-- Live URL: <https://elmalik490.github.io/eagle-eye-radar/>.
-- At the handover audit, `main`, `origin/main`, the local product files, and the live `index.html` were aligned. The local, raw-GitHub, and live HTML SHA-256 values matched.
-- The handover documentation commit does not alter `index.html` or the Pages workflow. GitHub Actions runs on every push to `main`; its result for the documentation commit is verified after that push as part of this checkpoint.
+The GitHub Pages site is <https://elmalik490.github.io/eagle-eye-radar/>. The last committed baseline before this pending implementation is `dea3bc609f976ab7f153e7e9e9dd47141d0eb325` (“Improve Eagle Eye demo explainability and review workflow”). This implementation continues from that baseline. The existing workflow at `.github/workflows/pages.yml` deploys the repository root after a push to `main`. The new working changes have been browser-tested locally; confirm the commit and successful Pages run after publishing before calling the public site updated.
 
-## Browser smoke-test status
+## Verification completed locally
 
-Live browser-console smoke test performed on 2026-10-07 UTC. All requested flows passed:
+A Playwright/Chromium run loaded nine records at viewport widths **360, 390, 430, 768, 1024, 1280, and 1440 px**, found no horizontal overflow, and captured no browser JavaScript exceptions at those widths. All six dictionaries contained every interface translation key; Arabic reported RTL while the others reported LTR. A Miami/Roofing filter returned one item, and the internal draft's Arabic guidance was translated.
 
-| Flow | Result |
-| --- | --- |
-| Phoenix, AZ + HVAC | Pass — scan displayed the card; Verify and Act opened; the demo approval alert stated that no external messages were sent. |
-| Miami, FL + Plumbing | Pass — card appeared with the Miami synthetic values. |
-| Houston, TX + Roofing | Pass — card appeared with the Houston synthetic values. |
+The app generated no OpenStreetMap tile requests before the visible **Load interactive map** control was activated. After activation, the Leaflet map rendered all three city-centroid markers with one map attribution; the filtered dossier responded to marker selection; World view and layer toggles worked; the map loaded eight visible OSM tiles in the check; and checking an evidence item did not verify the synthetic dossier. All records and generated drafts remain local; no business outreach or irreversible external action is enabled.
 
-Across the three flows, the card retained `DEMO / SYNTHETIC` and `UNVERIFIED`. The browser test captured no JavaScript errors and no `fetch`, `XMLHttpRequest.send`, or `sendBeacon` calls after the test hooks were installed. The external Tailwind CDN stylesheet/script had already loaded before those hooks. These are manual smoke tests, not a committed automated test suite.
-
-## What remains unimplemented
-
-- No real opportunity discovery, evidence verification, or data ingestion.
-- No backend, database, CRM integration, user authentication, persistent state, or outbound communications.
-- No production security/reliability model or automated regression tests.
-- No commercial validation conclusions. A private commercial-validation batch exists outside this public repository; no prospect or contact details are included here.
-
-See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for limitations and [HANDOVER.md](HANDOVER.md) for transfer precautions.
-
-## Implementation update — 2026-10-08
-The existing prototype now explains assumption-driven synthetic scenario ranges and demo priority arithmetic, varies assumptions by sector, and offers a human review checklist plus editable internal-only note. The review checklist does not validate any record; the UI keeps all output synthetic and unverified. The app remains a static single-page prototype with no live sources or external action capability. See `CHANGELOG.md` for the change summary and `IMPLEMENTATION_PLAN.md` for the ranked plan.
+This is a reproducible manual/local-browser check, not a committed test suite or a production accessibility/security audit. See [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for remaining limits, [PHASE2_PLAN.md](PHASE2_PLAN.md) for the ranked scope, and [CHANGELOG.md](CHANGELOG.md) for the implementation summary.
