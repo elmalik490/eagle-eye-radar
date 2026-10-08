@@ -6,20 +6,20 @@ Eagle Eye is an evolving **static opportunity-intelligence prototype**. Phase 4.
 
 - GitHub Pages: <https://elmalik490.github.io/eagle-eye-radar/>
 - Repository: <https://github.com/elmalik490/eagle-eye-radar>
-- Default branch: `main`
-- Deployment: `.github/workflows/pages.yml` publishes the repository root on pushes to `main` and manual dispatch.
-- Phase 4.2 local implementation and browser checks are documented in [`PHASE42_IMPLEMENTATION_PLAN.md`](PHASE42_IMPLEMENTATION_PLAN.md) and [`PROJECT_STATUS.md`](PROJECT_STATUS.md). Verify the exact Pages workflow and commit-specific public page before treating any candidate as deployed.
+- Default branch: `main`; Pages publishes the repository root from `.github/workflows/pages.yml`.
+- Phase 4.2 implementation commit: [`5e1ba8afd50a609bf80886b03549f4ec16219b97`](https://github.com/elmalik490/eagle-eye-radar/commit/5e1ba8afd50a609bf80886b03549f4ec16219b97); Pages workflow run [#37724305759](https://github.com/elmalik490/eagle-eye-radar/actions/runs/37724305759) succeeded.
+- Commit-specific live check: <https://elmalik490.github.io/eagle-eye-radar/?v=5e1ba8afd50a609bf80886b03549f4ec16219b97>. The published entry point, CSS, modules, Leaflet assets and world GeoJSON were checked after deployment.
 
 ## What the prototype does
 
 - Preserves the existing static page and GitHub Pages workflow; no framework/backend rebuild or build step.
-- Shows a local Natural Earth world-boundary map with **12 fictional public-city anchors** across six broad regions. The marker is a city anchor, not a company, lead, or observed event.
+- Shows a local Natural Earth world-boundary map with **12 fictional public-city anchors** across six broad regions. A marker is a city anchor, not a company, lead, or observed event.
 - Supports World, Region, Country and City map views; selection from map/list; a synchronized opportunity dossier; city/country/region, sector, type and heuristic-priority filters; and stable-ID/location/category search.
 - Presents a structured signal dossier with the fictional problem pattern, interpretation, explicitly hypothetical monthly value range and assumptions, unverified evidence status, source limitations, and suggested evidence/review step.
 - Shows deterministic demo priority dimensions separately from verification and evidence quality.
 - Retains a local-only, editable draft and human-approval boundary. Review checklists and workflow-stage changes never verify a record or send an action.
 - Includes six languages: English, French, Arabic (RTL), Russian, Chinese and Korean.
-- Uses a responsive map-first mobile layout, a collapsible filter drawer and a mobile dossier sheet.
+- Uses a responsive map-first mobile layout, a right-side collapsible filter drawer and a mobile dossier sheet.
 
 ## DEMO / SYNTHETIC versus real behavior
 

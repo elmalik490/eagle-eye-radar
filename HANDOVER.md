@@ -1,6 +1,6 @@
 # Eagle Eye — Handover
 
-**Current state at authoring:** Phase 4.2 World Radar changes are implemented and locally smoke-tested but have not yet been committed/deployed. Do not describe the candidate as live until its Pages workflow and commit-specific public assets are checked. The static architecture and existing deployment workflow remain intact.
+**Current state:** Phase 4.2 World Radar is deployed to GitHub Pages and live-verified. Product-code commit: `5e1ba8afd50a609bf80886b03549f4ec16219b97`. Pages workflow run [37724305759](https://github.com/elmalik490/eagle-eye-radar/actions/runs/37724305759) succeeded. Public URL: <https://elmalik490.github.io/eagle-eye-radar/>.
 
 ## Project shape
 
@@ -10,13 +10,12 @@
 
 All opportunities, signals, markers and financial assumptions are synthetic; city anchors are not business locations. Boundary geometry and optionally loaded OSM streets are real geography only, not intelligence evidence. Initial page rendering makes no external request. Enabling street tiles explicitly requests only visible OSM raster tiles and sends no opportunity records. Evidence remains empty/not assessed and every record remains unverified. Local stage changes/checklist/draft are not approvals, durable audit history or external action.
 
-Local Playwright/Chromium checks covered widths 360, 390, 430, 768, 1024, 1280 and 1440 px; six languages and RTL; search/filter/list/dossier; map scope/selection/reset/fullscreen; local verification/workflow/draft; reduced motion; and a tile request intercepted before network egress. No horizontal overflow, page exceptions or non-test console errors were observed. The smoke script lives in `/tmp/eagle_phase42_test.py`, not the repository or CI. This is not a formal accessibility, security, performance or cross-browser audit.
+Local Playwright/Chromium checks covered widths 360, 390, 430, 768, 1024, 1280 and 1440 px; six languages and RTL; search/filter/list/dossier; map scope/selection/reset/fullscreen; local verification/workflow/draft; reduced motion; and an intercepted optional tile request. Live public checks confirmed the code assets return HTTP 200 and match the implementation commit, the world map and 12 markers render after initialization, and the 390×844 Arabic RTL layout and filter drawer have no horizontal overflow. Default live page generated no non-GitHub request; app errors and console errors were zero. The smoke script is in `/tmp/eagle_phase42_test.py`, not CI. This is not a formal accessibility, security, performance or cross-browser audit.
 
 ## Next engineer actions
 
-1. Confirm the Phase 4.2 commit exists on `main`; check the matching GitHub Actions Pages run.
-2. Load the public URL with that exact SHA in the query string; verify entry point, CSS, modules, local GeoJSON and Leaflet assets return successfully and that the page renders.
-3. Update [`PROJECT_STATUS.md`](PROJECT_STATUS.md) and this handover with the final SHA/run/live result after evidence is collected.
-4. Keep the three next product decisions in [`ROADMAP.md`](ROADMAP.md): validate a narrow use case, choose an authorized source contract, then calibrate priority against reviewed outcomes.
+1. Treat the delivered product as a demo-only interface, not evidence of leakage or market opportunity.
+2. Use [`ROADMAP.md`](ROADMAP.md) to decide one narrow, owner-approved revenue-leakage job-to-be-done, then specify one lawful/authorized source contract and review measures before processing any real information.
+3. Keep private evidence and prospects outside this public repository. Do not introduce real source access, external messages, CRM writes, payments or automation without explicit scope and authorization.
 
-No prospect/business was contacted and no payment or irreversible external action was taken. Do not add real records, contacts, connectors, business claims or outbound automation without separate explicit scope and authorization.
+No prospect/business was contacted, no payment was made, and no external action was executed.
