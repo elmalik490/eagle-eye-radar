@@ -1,6 +1,6 @@
-# Eagle Eye — Opportunity Radar
+# Eagle Eye — World Opportunity Radar
 
-Eagle Eye is an evolving **static opportunity-intelligence prototype**. Phase 3 continues the existing v0.1/v0.2 project and Pages architecture; it is not a rebuild or a production revenue-recovery service. The interface uses synthetic scenarios only. It does **not** discover real businesses, verify actual revenue leakage, or recover revenue.
+Eagle Eye is an evolving **static opportunity-intelligence prototype**. Phase 4.2 continues the existing single-page v0.1 project; it is not a rebuild or a production revenue-recovery service. Its opportunity layer contains only fictional, locally authored scenarios. It does **not** discover businesses, detect actual leakage, verify a loss, or recover revenue.
 
 ## Live app and repository
 
@@ -8,26 +8,30 @@ Eagle Eye is an evolving **static opportunity-intelligence prototype**. Phase 3 
 - Repository: <https://github.com/elmalik490/eagle-eye-radar>
 - Default branch: `main`
 - Deployment: `.github/workflows/pages.yml` publishes the repository root on pushes to `main` and manual dispatch.
-- Phase 3 deployment: verified at commit `016aab34e543d566ced34d88535294f9650220d1`; the Pages Action completed successfully, and the public page and new modules returned HTTP 200.
+- Phase 4.2 local implementation and browser checks are documented in [`PHASE42_IMPLEMENTATION_PLAN.md`](PHASE42_IMPLEMENTATION_PLAN.md) and [`PROJECT_STATUS.md`](PROJECT_STATUS.md). Verify the exact Pages workflow and commit-specific public page before treating any candidate as deployed.
 
-## Current demo capabilities
+## What the prototype does
 
-- Existing single-page architecture with responsive desktop/mobile command-center layouts; seven viewport sizes from 360 to 1440 px were checked without horizontal overflow.
-- English, French, Arabic (RTL), Russian, Chinese and Korean interfaces; language preference remains browser-local.
-- Search by synthetic opportunity ID, city/location, sector or signal, plus location, sector, type, heuristic priority and verification filters.
-- A revenue-leakage taxonomy distinguishes categories with generic synthetic fixtures from concept-only categories.
-- Opportunity dossier separates identity, signal, interpretation, scenario value, evidence and gaps, source provenance, priority score/dimensions, freshness, verification, risks and recommended next step.
-- A versioned opportunity v1 data shape provides an adapter seam. See [`DATA_MODEL.md`](DATA_MODEL.md) and [`ARCHITECTURE.md`](ARCHITECTURE.md).
-- A six-stage, browser-session-only workflow (Detected → Review → Verification → Qualified → Action Ready → Resolved), with per-record local event history and reset. Stages never make evidence verified or authorize an action.
-- Editable internal-only draft, explicit human-approval guardrail, and local evidence checklist. Draft creation does not send or contact anyone.
-- Optional interactive Leaflet map with World/Country/City views, selected-city sync, synthetic priority/selection indicators and leakage/demand/verification/risk overlays. Map library/assets are local. Raster tiles are requested only after the visible opt-in load action; attribution is displayed.
-- An explicit data-readiness view shows future connection categories as **NOT CONNECTED**.
+- Preserves the existing static page and GitHub Pages workflow; no framework/backend rebuild or build step.
+- Shows a local Natural Earth world-boundary map with **12 fictional public-city anchors** across six broad regions. The marker is a city anchor, not a company, lead, or observed event.
+- Supports World, Region, Country and City map views; selection from map/list; a synchronized opportunity dossier; city/country/region, sector, type and heuristic-priority filters; and stable-ID/location/category search.
+- Presents a structured signal dossier with the fictional problem pattern, interpretation, explicitly hypothetical monthly value range and assumptions, unverified evidence status, source limitations, and suggested evidence/review step.
+- Shows deterministic demo priority dimensions separately from verification and evidence quality.
+- Retains a local-only, editable draft and human-approval boundary. Review checklists and workflow-stage changes never verify a record or send an action.
+- Includes six languages: English, French, Arabic (RTL), Russian, Chinese and Korean.
+- Uses a responsive map-first mobile layout, a collapsible filter drawer and a mobile dossier sheet.
 
 ## DEMO / SYNTHETIC versus real behavior
 
-All nine opportunity records, IDs, signals, scores, priorities, dollar ranges, assumptions, provenance, evidence placeholders, risk labels, leakage category example counts, map anchors/overlays and workflow events are synthetic or local UI state. There is no connected real-data source. The basemap can show real streets/place labels when the visitor opts into OSM tiles, but it does not validate the demo layer.
+**Real functionality:** static rendering, browser-side search/filter/selection, local synthetic-example generation, local workflow/draft UI, language preference, and rendering of public geographic boundary data. The boundary data is a locally bundled, simplified Natural Earth derivative; source and terms are recorded in [`data/ATTRIBUTION.md`](data/ATTRIBUTION.md).
 
-The priority score is a deterministic demo heuristic: synthetic demand (35%), illustrative scenario scale (40%) and synthetic urgency (25%). Evidence quality is deliberately separate and **not assessed**, because no evidence is connected. The score is not a probability, validated forecast, verified exposure, or recoverable revenue. The value range is a monthly illustrative scenario built from visible hypothetical assumptions—not business performance data.
+**DEMO / SYNTHETIC:** all 12 opportunity records, signals, IDs, scores, priority bands, dollar ranges, assumptions, evidence placeholders, recommendations and map markers. The basemap is not evidence for the opportunity layer. There is no connected business, revenue, CRM, call, service, transaction, lead, or other source. No signal or loss is verified.
+
+Priority is a deterministic sorting heuristic over three pre-authored demo dimensions: demand (45%), urgency (30%) and scope (25%). These fixture values are not measured. Evidence quality and confidence remain **not assessed**; priority is not probability, prediction, verified exposure, or expected recovery. The USD monthly value range is an illustrative calculation from visible synthetic assumptions, not observed business performance.
+
+## Map network behavior
+
+The default map draws local vector boundaries and synthetic city markers without requesting a map service. The optional street-tile switch is off by default. A visible pre-click notice says that enabling it requests only visible OpenStreetMap tiles and sends **no Eagle Eye records**. If enabled, the browser requests tiles from `tile.openstreetmap.org`; attribution is displayed. This public tile service is best-effort and is not a production SLA or commercial-scale entitlement. See [`KNOWN_ISSUES.md`](KNOWN_ISSUES.md).
 
 ## Run locally
 
@@ -37,12 +41,12 @@ No build step is required. From the repository root:
 python3 -m http.server 8080
 ```
 
-Open <http://localhost:8080>. The page, styles, modules and Leaflet library are served locally. If a visitor chooses **Load interactive map**, the browser requests the visible tiles from `tile.openstreetmap.org`; availability is best effort, not a production SLA. The map includes attribution.
+Open <http://localhost:8080>. Application modules, Leaflet 1.9.4 and world-boundary data are served locally. An optional user action is required before any OpenStreetMap tile request.
 
 ## Main files
 
-`index.html` remains the entry point; `css/app.css` owns the responsive and RTL design; `js/app.js` handles UI orchestration, search, dossier and local workflow; `js/demo-data.js` holds fictional fixtures; `js/opportunity-contract.js` normalizes the demo fixture; `js/scoring.js` calculates illustrative ranges and heuristic priority; `js/demo-workflow.js` owns session-only stages/events; `js/i18n.js` provides six-language strings; and `js/map-view.js` adapts Leaflet and synthetic overlays. `vendor/leaflet/` contains local Leaflet 1.9.4 files and license. [`DATA_MODEL.md`](DATA_MODEL.md), [`PHASE3_PLAN.md`](PHASE3_PLAN.md), and the status/architecture/roadmap/limitations/changelog/handover documents record scope and state.
+`index.html` remains the entry point; `css/app.css` owns responsive, mobile and RTL presentation; `js/app.js` orchestrates filters, dossier and local workflow; `js/demo-data.js` holds the fictional fixtures; `js/scoring.js` calculates illustrative ranges and deterministic demo ranking; `js/opportunity-contract.js` maps fixtures to the versioned v2 contract; `js/demo-workflow.js` owns session-only stages/events; `js/i18n.js` and `js/world-radar-i18n.js` provide six-language strings; `js/map-view.js` adapts Leaflet and synthetic markers; and `data/countries-110m.geojson` contains simplified public geographic boundaries. [`DATA_MODEL.md`](DATA_MODEL.md), [`ARCHITECTURE.md`](ARCHITECTURE.md), [`PHASE42_IMPLEMENTATION_PLAN.md`](PHASE42_IMPLEMENTATION_PLAN.md), and the status/limitations/roadmap/handover documents record design and state.
 
 ## Explicit boundaries
 
-No backend, database, real lead discovery, authenticated source access, CRM, persistent review/audit trail, automated execution, external messaging, payment flow or approval enforcement is implemented. Workflow events live only in current browser session storage and can be lost. “Reviewed,” stage movement and draft are not durable approvals or business decisions. Do not put prospects, contact details or private validation materials in this public repository.
+There is no backend, database, authentication, tenant isolation, real-data connector, durable audit log, enforced approval, CRM, automated execution, external messaging, payment flow or real opportunity discovery. Session workflow state can be lost. “Reviewed,” stage movement, checklist selection and a draft are not formal approvals or business decisions. Do not put prospects, contact details or private validation materials in this public repository.

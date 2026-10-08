@@ -1,67 +1,94 @@
-import { cities } from './demo-data.js';
+import { cities, regions } from './demo-data.js';
 import { scenarioFor } from './scoring.js';
 
-const esc = value => String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
-function loadLeaflet() {
-  if (window.L) return Promise.resolve();
-  if (loadLeaflet.pending) return loadLeaflet.pending;
-  loadLeaflet.pending = new Promise((resolve,reject)=>{
-    const script=document.createElement('script');script.src='vendor/leaflet/leaflet.js';
-    script.onload=()=>resolve();script.onerror=()=>reject(new Error('Local Leaflet library unavailable'));
-    document.head.append(script);
+const escapeHtml=value=>String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+function loadLeaflet(){
+  if(window.L)return Promise.resolve();
+  if(loadLeaflet.pending)return loadLeaflet.pending;
+  loadLeaflet.pending=new Promise((resolve,reject)=>{
+    const script=document.createElement('script');script.src=new URL('../vendor/leaflet/leaflet.js',import.meta.url).href;
+    script.onload=()=>resolve();script.onerror=()=>reject(new Error('Local Leaflet library unavailable'));document.head.append(script);
   });
   return loadLeaflet.pending;
 }
+const worldZoomFor=map=>{
+  const width=map.getSize().x||window.innerWidth||360;
+  const targetWidth=Math.max(280,width*.91);
+  return Math.max(.25,Math.min(2.25,Math.floor(Math.log2(targetWidth/256)*4)/4));
+};
 
-// OSM is map geometry only; all opportunity overlays are synthetic city-level illustrations.
-export class OpportunityMap {
-  constructor({containerId,records,onSelect,onTileError,labels,layers,selectedId}) {
-    this.containerId=containerId;this.records=records;this.onSelect=onSelect;this.onTileError=onTileError;
-    this.labels=labels;this.layers=layers;this.selectedId=selectedId;this.map=null;this.tileLayer=null;
-    this.markers=null;this.leakage=null;this.demand=null;this.priority=null;this.verification=null;this.risk=null;
+// Local Natural Earth geometry is a cartographic backdrop; markers remain synthetic city anchors.
+export class OpportunityMap{
+  constructor({containerId,records,onSelect,onCountrySelect,onTileError,labels,selectedId}){
+    Object.assign(this,{containerId,records,onSelect,onCountrySelect,onTileError,labels,selectedId});
+    this.map=null;this.countryGeo=null;this.markerLayer=null;this.countryFeatures=new Map();this.tileLayer=null;this.tilesEnabled=false;
   }
-  async mount(view,selectedCityId) {
+  async mount(){
     await loadLeaflet();
-    const city=cities.find(item=>item.id===selectedCityId)||cities[0];
-    const initial=view==='world'?[[25,-12],2]:view==='country'?[[39.2,-97.4],4]:[[city.lat,city.lng],9];
-    this.map=L.map(this.containerId,{worldCopyJump:true,scrollWheelZoom:false,preferCanvas:true,zoomAnimation:false,fadeAnimation:false}).setView(initial[0],initial[1],{animate:false});
-    this.tileLayer=L.tileLayer(this.tileUrl,{maxZoom:16,attribution:this.attribution,updateWhenIdle:true,keepBuffer:1});
-    this.tileLayer.on('tileerror',()=>this.onTileError?.());this.tileLayer.addTo(this.map);
-    this.markers=L.layerGroup().addTo(this.map);this.leakage=L.layerGroup().addTo(this.map);this.demand=L.layerGroup().addTo(this.map);
-    this.priority=L.layerGroup().addTo(this.map);this.verification=L.layerGroup().addTo(this.map);this.risk=L.layerGroup().addTo(this.map);
-    this.render(this.records,this.selectedId);setTimeout(()=>this.map.invalidateSize(),60);
+    this.map=L.map(this.containerId,{worldCopyJump:true,scrollWheelZoom:false,keyboard:true,keyboardPanDelta:70,zoomSnap:.25,zoomDelta:.5,minZoom:.25,maxZoom:12,preferCanvas:true,zoomAnimation:false,fadeAnimation:false,inertia:false,attributionControl:true}).setView([20,0],1,{animate:false});
+    const response=await fetch(new URL('../data/countries-110m.geojson',import.meta.url));
+    if(!response.ok)throw new Error(`Local world geography unavailable (${response.status})`);
+    const data=await response.json();
+    this.countryGeo=L.geoJSON(data,{style:()=>({color:'#355764',weight:.7,opacity:.9,fillColor:'#16313e',fillOpacity:.88,interactive:true}),
+      onEachFeature:(feature,layer)=>{
+        const code=feature.properties?.iso_a3;if(code&&code!=='-99')this.countryFeatures.set(code,layer);
+        layer.on({mouseover:event=>event.target.setStyle({color:'#71b7c1',weight:1.15,fillColor:'#204653'}),mouseout:event=>this.countryGeo.resetStyle(event.target),click:()=>{if(code&&code!=='-99')this.onCountrySelect?.(code,feature.properties?.name||code);}});
+      }
+    }).addTo(this.map);
+    this.markerLayer=L.layerGroup().addTo(this.map);
+    this.map.attributionControl.addAttribution('Made with <a href="https://www.naturalearthdata.com/" target="_blank" rel="noopener noreferrer">Natural Earth</a>');
+    this.render(this.records,this.selectedId);this.setView('world');
+    requestAnimationFrame(()=>this.map.invalidateSize());
     return this;
   }
-  get tileUrl() { return 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'; }
-  get attribution() { return `<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">${esc(this.labels.osmAttribution)}</a>`; }
-  updateLabels(labels) { this.labels=labels;if(this.tileLayer)this.tileLayer.setAttribution(this.attribution);this.render(this.records,this.selectedId); }
-  updateLayers(layers) { this.layers=layers;this.render(this.records,this.selectedId); }
-  render(records,selectedId=this.selectedId) {
-    this.records=records;this.selectedId=selectedId;if(!this.map)return;
-    for(const layer of [this.markers,this.leakage,this.demand,this.priority,this.verification,this.risk])layer.clearLayers();
-    cities.forEach(city=>{
-      const cityRecords=records.filter(record=>record.cityId===city.id);if(!cityRecords.length)return;
-      const citySelected=cityRecords.some(record=>record.id===selectedId);
-      const topScore=Math.max(...cityRecords.map(record=>scenarioFor(record).score));
-      const band=topScore>=58?'high':topScore>=50?'medium':'low';
-      if(this.layers.markers){
-        const icon=L.divIcon({className:'',html:`<span class="synthetic-marker priority-${band}${citySelected?' selected':''}" style="display:block;width:${citySelected?21:16}px;height:${citySelected?21:16}px"></span>`,iconSize:[citySelected?21:16,citySelected?21:16],iconAnchor:[citySelected?10.5:8,citySelected?10.5:8]});
-        const marker=L.marker([city.lat,city.lng],{icon,title:`${this.labels[city.nameKey]||city.name} · ${this.labels.cityMarker}${citySelected?` · ${this.labels.legendSelected}`:''}`});
-        marker.bindPopup(`<strong>${esc(this.labels[city.nameKey]||city.name)}</strong><br>${esc(this.labels.cityMarker)}<br><span>${cityRecords.length} · ${esc(this.labels.demo)} · ${esc(this.labels.unverified)}</span>`);
-        marker.on('click',()=>this.onSelect(cityRecords[0].id));this.markers.addLayer(marker);
-      }
-      if(this.layers.leakage){const circle=L.circle([city.lat,city.lng],{radius:19000,color:'#f0c36e',fillColor:'#f0c36e',fillOpacity:.15,weight:1});circle.bindTooltip(`${esc(this.labels.layerLeakage)} · ${esc(this.labels.demo)}`);this.leakage.addLayer(circle);}
-      if(this.layers.demand){const circle=L.circle([city.lat+.13,city.lng+.12],{radius:33000,color:'#61d7ad',fillColor:'#61d7ad',fillOpacity:.12,weight:1});circle.bindTooltip(`${esc(this.labels.layerDemand)} · ${esc(this.labels.demo)}`);this.demand.addLayer(circle);}
-      if(this.layers.priority){const dot=L.circleMarker([city.lat,city.lng],{radius:10,color:'#f0c36e',weight:2,fillColor:'#f0c36e',fillOpacity:.18});dot.bindTooltip(`${esc(this.labels.mapPriority)} · ${topScore}/100 · ${esc(this.labels.demo)}`);this.priority.addLayer(dot);}
-      if(this.layers.verification){const ring=L.circleMarker([city.lat,city.lng],{radius:15,color:'#e3a2a2',weight:2,dashArray:'2 4',fillOpacity:0});ring.bindTooltip(`${esc(this.labels.mapVerification)} · ${esc(this.labels.unverified)}`);this.verification.addLayer(ring);}
-      if(this.layers.risk){const ring=L.circleMarker([city.lat,city.lng],{radius:20,color:'#d69861',weight:1,dashArray:'3 4',fillOpacity:0});ring.bindTooltip(`${esc(this.labels.mapRisk)} · ${esc(this.labels.notAssessed)}`);this.risk.addLayer(ring);}
-    });
+  updateLabels(labels){this.labels=labels;this.render(this.records,this.selectedId);}
+  render(records,selectedId=this.selectedId){
+    this.records=records;this.selectedId=selectedId;if(!this.map||!this.markerLayer)return;
+    this.markerLayer.clearLayers();
+    for(const record of records){
+      const city=cities.find(item=>item.id===record.cityId);if(!city)continue;
+      const scored=scenarioFor(record);const selected=record.id===selectedId;
+      const label=city.names[this.labels.lang]||city.names.en;
+      const country=city.countries[this.labels.lang]||city.countries.en;
+      const type=this.labels.typeName?.(record.type)||record.type;
+      const title=`${label}, ${country} · ${type} · ${this.labels.demo} · ${this.labels.unverified}`;
+      const icon=L.divIcon({className:'radar-marker-icon',html:`<span class="radar-marker type-${escapeHtml(record.type)} priority-${scored.priorityBand}${selected?' selected':''}" aria-hidden="true"></span>`,iconSize:[selected?27:21,selected?27:21],iconAnchor:[selected?13.5:10.5,selected?13.5:10.5]});
+      const marker=L.marker([city.lat,city.lng],{icon,title,keyboard:true,alt:title,riseOnHover:true});
+      marker.bindTooltip(escapeHtml(`${label} · ${country}`),{direction:'top',offset:[0,-9],opacity:.96});
+      marker.on('click',()=>this.onSelect?.(record.id,'map'));
+      this.markerLayer.addLayer(marker);
+    }
   }
-  setView(view,cityId) {
+  setView(view,{cityId=null,regionId=null,countryCode=null}={}){
     if(!this.map)return;
+    if(view==='world'){this.map.setView([20,0],worldZoomFor(this.map),{animate:false});return;}
+    if(view==='region'){
+      const requestedId=regionId||cities.find(item=>item.id===cityId)?.regionId||'northAmerica';
+      const id=Object.prototype.hasOwnProperty.call(regions,requestedId)?requestedId:'northAmerica';
+      const centers={northAmerica:[43,-100,3],southAmerica:[-22,-58,3],europe:[52,13,4],africa:[2,18,3],asia:[30,100,2.75],oceania:[-25,145,3]};
+      const [lat,lng,zoom]=centers[id]||[24,5,2.75];
+      this.map.setView([lat,lng],zoom,{animate:false});return;
+    }
     const city=cities.find(item=>item.id===cityId)||cities[0];
-    const target=view==='world'?[[25,-12],2]:view==='country'?[[39.2,-97.4],4]:[[city.lat,city.lng],10];
-    this.map.setView(target[0],target[1],{animate:false});
+    if(view==='country'){
+      const feature=this.countryFeatures.get(countryCode||city.countryCode);
+      if(feature){const center=feature.getBounds().getCenter();this.map.setView(center,4.5,{animate:false});return;}
+      this.map.setView([city.lat,city.lng],4.5,{animate:false});return;
+    }
+    this.map.setView([city.lat,city.lng],6.5,{animate:false});
   }
-  resetView(view,cityId){this.setView(view,cityId);}
+  focusRecord(record){const city=cities.find(item=>item.id===record?.cityId);if(city)this.map?.setView([city.lat,city.lng],6.5,{animate:false});}
+  reset(){this.setView('world');}
+  setTilesEnabled(enabled){
+    if(!this.map)return false;
+    if(enabled&&!this.tileLayer){
+      this.tileLayer=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,maxNativeZoom:18,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>',updateWhenIdle:true,keepBuffer:1,detectRetina:false});
+      this.tileLayer.on('tileerror',()=>this.onTileError?.());
+    }
+    if(enabled&&!this.map.hasLayer(this.tileLayer))this.tileLayer.addTo(this.map);
+    if(!enabled&&this.tileLayer&&this.map.hasLayer(this.tileLayer))this.map.removeLayer(this.tileLayer);
+    this.tilesEnabled=Boolean(enabled);return true;
+  }
+  invalidateSize(){this.map?.invalidateSize({animate:false});}
+  setFullscreen(enabled){document.getElementById(this.containerId)?.closest('.map-shell')?.classList.toggle('fullscreen',Boolean(enabled));requestAnimationFrame(()=>this.invalidateSize());}
 }

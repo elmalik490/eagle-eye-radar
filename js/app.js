@@ -1,115 +1,125 @@
-import { cities, sectors, demoRecords, types } from './demo-data.js';
+import { cities, regions, sectors, opportunityTypes, demoRecords } from './demo-data.js';
 import { scenarioFor, money } from './scoring.js';
-import { translations, getLanguage, applyLanguage } from './i18n.js';
+import { getLanguage, applyLanguage } from './i18n.js';
 import { OpportunityMap } from './map-view.js';
 import { toOpportunityContract } from './opportunity-contract.js';
 import { DemoWorkflow, workflowStages } from './demo-workflow.js';
 
 let lang=getLanguage();
 let t=applyLanguage(lang);
-let selectedId='phoenix-hvac';
+let selectedId=demoRecords[0]?.id||null;
 let filtered=[];
 let history=[];
 let mapController=null;
-let mapTileErrors=0;
-let mapView='city';
+let mapView='world';
+let mobileDossierOpen=false;
 const sessionStartedAt=new Date().toISOString();
 const workflow=new DemoWorkflow(demoRecords.map(record=>record.id),sessionStartedAt);
+const reviewChecks=new Map();
 const $=id=>document.getElementById(id);
-const typeKey={missedCalls:'typeMissedCalls',unansweredLeads:'typeUnansweredLeads',serviceDemand:'typeServiceDemand'};
-const priorityKey={high:'priorityHigh',medium:'priorityMedium',low:'priorityLow'};
-const cityKey={phoenix:'cityPhoenix',miami:'cityMiami',houston:'cityHouston'};
-const sectorKey={hvac:'sectorHvac',plumbing:'sectorPlumbing',roofing:'sectorRoofing'};
-const scoreLabels={demand:'demand',revenue:'revenue',urgency:'urgency'};
 const stageLabels={detected:'stageDetected',review:'stageReview',verification:'stageVerification',qualified:'stageQualified',actionReady:'stageActionReady',resolved:'stageResolved'};
-const leakageCategories=[
-  {key:'categoryMissedCalls',type:'missedCalls'},
-  {key:'categoryAbandonedQuotes'},
-  {key:'categoryUnansweredLeads',type:'unansweredLeads'},
-  {key:'categoryUnfollowedEstimates'},
-  {key:'categoryInactiveCustomers'},
-  {key:'categoryLostRepeat'},
-  {key:'categoryUnderusedAssets'},
-  {key:'categoryOperationalWaste'}
-];
-function cityName(city){return t[cityKey[city.id]]||city.name;}
-function sectorName(id){return t[sectorKey[id]]||sectors[id].label;}
-function recordScore(record){return scenarioFor(record);}
-function contractFor(record){return toOpportunityContract(record,recordScore(record),sessionStartedAt,workflow.getStage(record.id));}
-function escapeHtml(value){return String(value).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));}
-function formatDate(value){const date=new Date(value);return Number.isNaN(date.getTime())?t.notAssessed:new Intl.DateTimeFormat(lang,{dateStyle:'medium',timeStyle:'short'}).format(date);}
-function addHistory(key,detail='') {history.unshift({key,detail,at:new Date().toISOString()});renderHistory();}
-function initFilters(){const select=$('locationFilter');for(const city of cities){const opt=document.createElement('option');opt.value=city.id;opt.textContent=cityName(city);select.append(opt);}}
+const priorityKey={high:'priorityHigh',medium:'priorityMedium',low:'priorityLow'};
+const scoreLabels={demand:'demandDemo',urgency:'urgencyDemo',scope:'scopeDemo'};
+const all=select=>!select||select.value==='all';
+const clean=value=>String(value??'').normalize('NFKD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase(lang);
+const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+const cityById=id=>cities.find(city=>city.id===id);
+const cityName=city=>city?.names?.[lang]||city?.names?.en||'';
+const countryName=city=>city?.countries?.[lang]||city?.countries?.en||'';
+const regionName=id=>regions[id]?.names?.[lang]||regions[id]?.names?.en||'';
+const sectorName=id=>sectors[id]?.names?.[lang]||sectors[id]?.names?.en||id;
+const typeInfo=id=>opportunityTypes[id]||opportunityTypes.missedDemand;
+const typeName=id=>typeInfo(id).names[lang]||typeInfo(id).names.en;
+const mapLabels=()=>({...t,lang,typeName});
+const recordScore=record=>scenarioFor(record);
+const contractFor=record=>toOpportunityContract(record,recordScore(record),workflow.getStage(record.id));
+const formatDate=value=>{const date=new Date(value);return Number.isNaN(date.getTime())?t.notAssessed:new Intl.DateTimeFormat(lang,{dateStyle:'medium',timeStyle:'short'}).format(date);};
+
+function addHistory(key,detail=''){
+  history.unshift({key,detail,at:new Date().toISOString()});
+  if(history.length>60)history.length=60;
+  renderHistory();
+}
+function fillSelect(id,rows,allLabel){
+  const select=$(id);if(!select)return;
+  const previous=select.value||'all';
+  while(select.options.length>1)select.remove(1);
+  rows.forEach(row=>{const option=document.createElement('option');option.value=row.value;option.textContent=row.label;select.append(option);});
+  select.value=[...select.options].some(option=>option.value===previous)?previous:'all';
+  if(select.options[0])select.options[0].textContent=allLabel;
+}
+function initFilters(){
+  fillSelect('regionFilter',Object.keys(regions).map(id=>({value:id,label:regionName(id)})),t.allRegions);
+  const countryRows=[...new Map(cities.map(city=>[city.countryCode,{value:city.countryCode,label:countryName(city)}])).values()].sort((a,b)=>a.label.localeCompare(b.label,lang));
+  fillSelect('countryFilter',countryRows,t.allCountries);
+  fillSelect('locationFilter',cities.map(city=>({value:city.id,label:cityName(city)})).sort((a,b)=>a.label.localeCompare(b.label,lang)),t.allCities);
+  fillSelect('sectorFilter',Object.keys(sectors).map(id=>({value:id,label:sectorName(id)})),t.allSectors);
+  fillSelect('typeFilter',Object.keys(opportunityTypes).map(id=>({value:id,label:typeName(id)})),t.allTypes);
+}
+function searchCorpus(record){
+  const city=cityById(record.cityId),type=typeInfo(record.type),sector=sectors[record.sector];
+  const translations=[...Object.values(city.names),...Object.values(city.countries),...Object.values(type.names),...Object.values(type.problem),...Object.values(sector.names)];
+  const region=regions[record.regionId];if(region)translations.push(...Object.values(region.names));
+  return clean([record.id,record.cityId,record.countryCode,record.sector,record.type,...translations].join(' '));
+}
 function filteredRecords(){
-  const q=$('searchFilter').value.trim().toLocaleLowerCase(lang);
+  const query=clean($('searchFilter')?.value.trim()||'');
   return demoRecords.filter(record=>{
-    const city=cities.find(item=>item.id===record.cityId);
-    const humanId=`ee-demo-${record.cityId}-${record.sector}`;
-    const haystack=`${record.id} ${humanId} ${cityName(city)} ${city.country} ${sectorName(record.sector)} ${t[typeKey[record.type]]} ${t[record.signalKey]}`.toLocaleLowerCase(lang);
-    return (!$('locationFilter').value||$('locationFilter').value==='all'||record.cityId===$('locationFilter').value)
-      &&(!$('sectorFilter').value||$('sectorFilter').value==='all'||record.sector===$('sectorFilter').value)
-      &&(!$('typeFilter').value||$('typeFilter').value==='all'||record.type===$('typeFilter').value)
-      &&(!$('priorityFilter').value||$('priorityFilter').value==='all'||record.priorityBand===$('priorityFilter').value)
-      &&$('verificationFilter').value==='unverified'
-      &&(!q||haystack.includes(q));
-  }).sort((a,b)=>recordScore(b).score-recordScore(a).score);
+    const matchesRegion=all($('regionFilter'))||record.regionId===$('regionFilter').value;
+    const matchesCountry=all($('countryFilter'))||record.countryCode===$('countryFilter').value;
+    const matchesCity=all($('locationFilter'))||record.cityId===$('locationFilter').value;
+    const matchesSector=all($('sectorFilter'))||record.sector===$('sectorFilter').value;
+    const matchesType=all($('typeFilter'))||record.type===$('typeFilter').value;
+    const matchesPriority=all($('priorityFilter'))||recordScore(record).priorityBand===$('priorityFilter').value;
+    return matchesRegion&&matchesCountry&&matchesCity&&matchesSector&&matchesType&&matchesPriority&&(!query||searchCorpus(record).includes(query));
+  }).sort((a,b)=>recordScore(b).score-recordScore(a).score||a.id.localeCompare(b.id));
 }
-function renderKpis(){
-  $('kpiCount').textContent=filtered.length;
-  const summary=workflow.getSummary();
-  $('kpiReviewQueue').textContent=(summary.review||0)+(summary.verification||0);
-  $('kpiHigh').textContent=demoRecords.filter(record=>record.priorityBand==='high').length;
-  const current=filtered.find(record=>record.id===selectedId)||filtered[0];
-  if(current){const scored=recordScore(current);$('kpiPriority').textContent=`${scored.score} / 100`;$('kpiScenarioValue').textContent=`${money(scored.low)}–${money(scored.high)}`;}
-  else{$('kpiPriority').textContent='—';$('kpiScenarioValue').textContent='—';}
-  $('kpiVerified').textContent=t.unverified;
-  $('kpiUnverifiedNote').textContent=`${demoRecords.length} · ${t.demo}`;
-}
-function renderPipeline(){
-  const summary=workflow.getSummary();const active=workflow.getStage(selectedId);const root=$('pipelineTrack');root.replaceChildren();
-  workflowStages.forEach((stage,index)=>{
-    const item=document.createElement('li');item.className='pipeline-step'+(stage===active?' active':'')+(index<workflowStages.indexOf(active)?' complete':'');
-    item.setAttribute('aria-current',stage===active?'step':'false');
-    const name=document.createElement('span');name.className='pipeline-step-name';name.textContent=t[stageLabels[stage]];
-    const count=document.createElement('strong');count.className='pipeline-count';count.textContent=summary[stage]||0;
-    item.append(name,count);root.append(item);
-  });
+function renderSummary(){
+  $('kpiCount').textContent=String(filtered.length);
+  $('kpiRegions').textContent=String(new Set(filtered.map(record=>record.regionId)).size);
+  $('kpiHigh').textContent=String(filtered.filter(record=>recordScore(record).priorityBand==='high').length);
+  $('kpiVerified').textContent='0';
+  $('resultCount').textContent=String(filtered.length);
+  $('mapCount').textContent=`${filtered.length} · ${t.demo}`;
 }
 function renderList(){
-  $('resultCount').textContent=filtered.length;const list=$('opportunityList');list.replaceChildren();
-  if(!filtered.length){const empty=document.createElement('div');empty.className='empty';empty.textContent=t.noResults;list.append(empty);return;}
+  const root=$('opportunityList');root.replaceChildren();
+  if(!filtered.length){const empty=document.createElement('div');empty.className='empty';empty.textContent=t.noResults;root.append(empty);return;}
   filtered.forEach(record=>{
-    const city=cities.find(item=>item.id===record.cityId),score=recordScore(record);
-    const button=document.createElement('button');button.type='button';button.className='opp-item'+(record.id===selectedId?' selected':'');
-    button.setAttribute('aria-pressed',String(record.id===selectedId));button.dataset.recordId=record.id;
-    button.innerHTML=`<span><span class="opp-title">${escapeHtml(sectorName(record.sector))}</span><span class="opp-meta">${escapeHtml(cityName(city))} · ${escapeHtml(t[typeKey[record.type]])} · ${escapeHtml(record.id)}</span></span><span class="opp-right"><span class="opp-score">${score.score}/100</span><br><span class="badge">${escapeHtml(t[priorityKey[record.priorityBand]])}</span></span>`;
-    button.addEventListener('click',()=>selectRecord(record.id,true));list.append(button);
+    const city=cityById(record.cityId),score=recordScore(record);
+    const button=document.createElement('button');button.type='button';button.className='opp-item'+(record.id===selectedId?' selected':'');button.setAttribute('role','listitem');button.setAttribute('aria-pressed',String(record.id===selectedId));button.dataset.recordId=record.id;
+    button.setAttribute('aria-label',`${cityName(city)}, ${countryName(city)} · ${typeName(record.type)} · ${t[priorityKey[score.priorityBand]]} · ${record.id}`);
+    button.innerHTML=`<span><span class="opp-title">${esc(typeName(record.type))}</span><span class="opp-meta">${esc(cityName(city))}, ${esc(countryName(city))} · ${esc(regionName(record.regionId))} · ${esc(sectorName(record.sector))}</span><span class="opp-meta">${esc(record.id)} · ${esc(t.demo)} · ${esc(t.unverified)}</span></span><span class="opp-right"><span class="opp-score">${score.score}/100</span><br><span class="badge">${esc(t[priorityKey[score.priorityBand]])}</span></span>`;
+    button.addEventListener('click',()=>selectRecord(record.id,'list'));
+    root.append(button);
   });
 }
-function kv(label,value){return `<div class="kv-item"><span>${escapeHtml(label)}</span><strong>${value}</strong></div>`;}
+function section(title,body){return `<section class="dossier-section"><div class="dossier-label">${esc(title)}</div><div class="dossier-content">${body}</div></section>`;}
+function metric(label,value){return `<div class="dossier-meta"><span>${esc(label)}</span><strong>${value}</strong></div>`;}
 function renderDossier(){
-  const record=demoRecords.find(item=>item.id===selectedId);const root=$('dossierContent');root.replaceChildren();
-  if(!record){const empty=document.createElement('div');empty.className='empty';empty.textContent=t.dossierPrompt;root.append(empty);$('dossierWorkflow').replaceChildren();$('workflowTimeline').replaceChildren();return;}
-  const contract=contractFor(record),scored=recordScore(record),city=scored.city,assumptions=contract.valueScenario.assumptions;
-  const card=document.createElement('div');card.className='dossier-record';
-  const identity=`<div class="kv-grid">${kv(t.opportunityId,`<code>${escapeHtml(contract.id)}</code>`)}${kv(t.location,`${escapeHtml(cityName(city))} · ${escapeHtml(t.country)}`)}${kv(t.sector,escapeHtml(sectorName(record.sector)))}${kv(t.opportunityType,escapeHtml(t[typeKey[record.type]]))}${kv(t.detectedSession,escapeHtml(formatDate(contract.identity.detectedAt)))}</div>`;
-  const signal=`<div class="callout">${escapeHtml(t[record.signalKey])}</div>${kv(t.signal,escapeHtml(t[typeKey[record.type]]))}${kv(t.signalStrength,escapeHtml(t.notMeasured))}`;
-  const value=`<div class="value-range">${money(contract.valueScenario.low)}–${money(contract.valueScenario.high)}</div><div class="formula">${escapeHtml(t.monthly)} · ${escapeHtml(t.formulaDetail)}</div><div class="kv-grid compact">${kv(t.ticketPerJob,`${money(assumptions.tickets[0])}–${money(assumptions.tickets[1])}`)}${kv(t.hypotheticalLeads,`${assumptions.leads[0]}–${assumptions.leads[1]}`)}${kv(t.assumedRecoverable,`${Math.round(assumptions.recoverableShare[0]*100)}–${Math.round(assumptions.recoverableShare[1]*100)}%`)}${kv(t.cityMultiplier,String(assumptions.cityMultiplier))}</div>`;
-  const priority=`<div class="score-big">${contract.priority.score} / 100</div><div class="formula">${escapeHtml(t.scoreModel)} · ${escapeHtml(t.scenarioOnly)}</div><div class="score-bars">${Object.entries(scored.dimensions).map(([key,value])=>`<div><div class="score-bar-head"><span>${escapeHtml(t[scoreLabels[key]])}</span><span>${value}/100</span></div><div class="track"><div class="fill" style="width:${value}%"></div></div></div>`).join('')}</div><div class="separated-status">${kv(t.evidence,`<span class="badge red">${escapeHtml(t.notAssessed)}</span>`)}${kv(t.freshness,`<span class="badge">${escapeHtml(t.mapOff)}</span>`)}${kv(t.verification,`<span class="badge red">${escapeHtml(t.unverified)}</span>`)}</div>`;
-  const evidence=`${kv(t.evidenceAvailable,escapeHtml(t.noEvidence))}${kv(t.evidenceMissing,`<ul class="compact-list"><li>${escapeHtml(t.sourceDate)}</li><li>${escapeHtml(t.corroborated)}</li><li>${escapeHtml(t.scope)}</li></ul>`)}${kv(t.evidenceQuality,`<span class="badge red">${escapeHtml(t.notAssessed)}</span> · ${escapeHtml(t.syntheticDataset)}`)}`;
-  const provenance=`<div class="kv-grid">${kv(t.sourceLabel,escapeHtml(t.syntheticDataset))}${kv(t.collectionDate,escapeHtml(formatDate(contract.provenance.collectionDate)))}${kv(t.coverage,escapeHtml(t.syntheticCoverage))}${kv(t.freshness,escapeHtml(t.freshnessDemo))}${kv(t.reliability,escapeHtml(t.notAssessed))}${kv(t.permissionStatus,escapeHtml(t.localSyntheticPermission))}${kv(t.evidenceType,escapeHtml(t.evidenceTypeSynthetic))}</div>`;
-  const risk=`<div class="kv-grid">${kv(t.dataUncertainty,`<span class="badge red">${escapeHtml(t.syntheticHighUncertainty)}</span>`)}${kv(t.falsePositiveRisk,`<span class="badge">${escapeHtml(t.notAssessed)}</span>`)}${kv(t.operationalRisk,`<span class="badge">${escapeHtml(t.notAssessed)}</span>`)}</div>`;
-  const interpretation=`<div class="callout muted-callout">${escapeHtml(t.interpretationText)}</div>`;
-  const recommendation=`<div>${escapeHtml(t[record.actionKey])}</div>${kv(t.whyRecommendation,escapeHtml(t.interpretationText))}<p class="formula" data-i18n="requiresHumanApproval">${escapeHtml(t.requiresHumanApproval)}</p>`;
-  const sections=[
-    [t.dossierIdentity,identity],[t.signal,signal],[t.interpretation,interpretation],[t.estimatedValue,value],
-    [t.priorityScore,priority],[t.evidence,evidence],[t.sourceProvenance,provenance],[t.verificationState,`<span class="badge red">${escapeHtml(t.unverified)}</span><p class="formula">${escapeHtml(t.verifyHint)}</p>`],
-    [t.risk,risk],[t.recommendedAction,recommendation]
-  ];
-  const top=document.createElement('div');top.className='dossier-top';top.innerHTML=`<div><h2>${escapeHtml(sectorName(record.sector))}</h2><p>${escapeHtml(cityName(city))} · ${escapeHtml(t[typeKey[record.type]])}</p></div><span class="badge">${escapeHtml(t.demo)}</span>`;card.append(top);
-  const secRoot=document.createElement('div');secRoot.className='dossier-sections';
-  sections.forEach(([label,content])=>{const section=document.createElement('section');section.className='dossier-section';const title=document.createElement('div');title.className='dossier-label';title.textContent=label;const body=document.createElement('div');body.className='dossier-content';body.innerHTML=content;section.append(title,body);secRoot.append(section);});
-  card.append(secRoot);root.append(card);renderDossierWorkflow(contract);
+  const root=$('dossierContent');root.replaceChildren();
+  const record=demoRecords.find(item=>item.id===selectedId);
+  if(!record){const empty=document.createElement('div');empty.className='empty';empty.textContent=t.dossierPrompt;root.append(empty);$('dossierWorkflow').replaceChildren();$('workflowTimeline').replaceChildren();$('selectedPreviewText').textContent=t.dossierPrompt;return;}
+  const contract=contractFor(record),scored=recordScore(record),city=scored.city,signal=typeInfo(record.type),checks=reviewChecks.get(record.id)||new Set();
+  const priorityText=t[priorityKey[scored.priorityBand]];
+  const top=`<div class="dossier-top"><div><h2>${esc(typeName(record.type))}</h2><p>${esc(cityName(city))}, ${esc(countryName(city))} · ${esc(regionName(city.regionId))}</p></div><span class="badge">${esc(t.demo)}</span></div>`;
+  const identity=`<div class="dossier-metadata">${metric(t.opportunityId,`<code>${esc(record.id)}</code>`)}${metric(t.sector,esc(sectorName(record.sector)))}${metric(t.evidence,`<span class="badge red">${esc(t.unverified)}</span>`)}${metric(t.confidenceNotAssessed,esc(t.notAssessed))}</div>`;
+  const summary=`<div class="dossier-callout">${esc(signal.problem[lang])}</div><p><strong>${esc(t.signalNotProof)}</strong> · ${esc(t.unverified)}</p>`;
+  const why=`<p>${esc(signal.why[lang])}</p><p>${esc(signal.whyNow[lang])}</p><p class="formula">${esc(t.generalTrendOnly)}</p>`;
+  const ai=`<p>${esc(t.aiNotConnected)}</p>`;
+  const blueprint=`<ol class="blueprint-list"><li>${esc(t.blueprintDetect)}</li><li>${esc(t.blueprintVerify)}</li><li>${esc(t.blueprintSolve)}</li></ol>`;
+  const assumptions=contract.valueScenario.assumptions;
+  const value=`<div class="value-range">${esc(money(contract.valueScenario.low,lang))} – ${esc(money(contract.valueScenario.high,lang))}</div><p class="formula">${esc(t.monthly)} · ${esc(t.scenarioAssumptions)}</p><details class="scenario-assumptions"><summary>${esc(t.scenarioFormula)}</summary><div class="kv-grid compact">${metric(t.hypotheticalLeads,`${assumptions.prospects[0]}–${assumptions.prospects[1]}`)}${metric(t.ticketPerJob,`${money(assumptions.ticket[0],lang)}–${money(assumptions.ticket[1],lang)}`)}${metric(t.assumedRecoverable,`${Math.round(assumptions.recoverableShare[0]*100)}–${Math.round(assumptions.recoverableShare[1]*100)}%`)}<p class="formula">${esc(t.scenarioFormulaText)}</p></div></details>`;
+  const dimensionBars=Object.entries(scored.dimensions).map(([key,value])=>`<div><div class="score-bar-head"><span>${esc(t[scoreLabels[key]])}</span><span>${value}/100</span></div><div class="track"><div class="fill" style="width:${value}%"></div></div></div>`).join('');
+  const priority=`<div class="dossier-priority"><strong>${scored.score}/100</strong><span class="badge">${esc(priorityText)}</span></div><p class="priority-explanation">${esc(t.priorityExplanation)}</p><div class="score-bars">${dimensionBars}</div>`;
+  const evidence=`<p>${esc(signal.evidence[lang])}</p><div class="dossier-callout"><strong>${esc(t.evidenceQuestion)}</strong><p>${esc(t.evidenceQuestionText)}</p></div>`;
+  const provenance=`<div class="dossier-metadata">${metric(t.sourceLabel,esc(t.syntheticSource))}${metric(t.coverage,esc(t.coverageGlobal))}${metric(t.freshness,esc(t.noObservedTime))}${metric(t.reliability,esc(t.notAssessed))}</div>`;
+  const action=`<p>${esc(signal.action[lang])}</p><p class="formula">${esc(t.reviewAgainstAuthorizedEvidence)}</p><p class="no-send-note">${esc(t.requiresHumanApproval)}</p>`;
+  root.innerHTML=`<div class="dossier-record">${top}${section(t.dossierIdentity,identity)}${section(t.problem,summary)}${section(t.whyNow,why)}${section(t.aiLeverage,ai)}${section(t.businessBlueprint,blueprint)}${section(t.estimatedValue,value)}${section(t.priorityScore,priority)}${section(t.evidence,evidence)}${section(t.sourceProvenance,provenance)}${section(t.recommendedAction,action)}</div>`;
+  $('selectedPreviewText').textContent=`${cityName(city)} · ${typeName(record.type)} · ${scored.score}/100 · ${t.unverified}`;
+  document.querySelectorAll('.evidence-check').forEach((input,index)=>{input.checked=checks.has(index);});
+  updateCheckProgress();
+  renderDossierWorkflow(contract);
 }
 function eventText(event){
   if(event.kind==='generated')return t.auditGenerated;
@@ -123,92 +133,184 @@ function eventText(event){
 function renderDossierWorkflow(contract){
   const root=$('dossierWorkflow');root.replaceChildren();if(!contract)return;
   const stage=contract.workflowStage,index=workflowStages.indexOf(stage),isLast=index===workflowStages.length-1;
-  const stageTrack=workflowStages.map(item=>`<span class="mini-stage${item===stage?' active':''}">${escapeHtml(t[stageLabels[item]])}</span>`).join('');
-  root.innerHTML=`<div class="workflow-bar"><div><span class="dossier-label">${escapeHtml(t.pipelineTitle)}</span><strong>${escapeHtml(t[stageLabels[stage]])}</strong></div><span class="badge">${escapeHtml(t.workflowLocal)}</span></div><div class="mini-pipeline">${stageTrack}</div><p class="formula">${escapeHtml(t.pipelineHint)}</p><div class="action-row"><button id="nextStage" class="button tiny secondary" type="button" ${isLast?'disabled':''}>${escapeHtml(isLast?t.stageComplete:t.nextStage)}</button><button id="resetStage" class="button tiny" type="button">${escapeHtml(t.resetStage)}</button></div>`;
+  const stageTrack=workflowStages.map(item=>`<span class="mini-stage${item===stage?' active':''}">${esc(t[stageLabels[item]])}</span>`).join('');
+  root.innerHTML=`<div class="workflow-bar"><div><span class="dossier-label">${esc(t.pipelineTitle)}</span><strong>${esc(t[stageLabels[stage]])}</strong></div><span class="badge">${esc(t.workflowLocal)}</span></div><div class="mini-pipeline">${stageTrack}</div><p class="formula">${esc(t.pipelineHint)}</p><div class="action-row"><button id="nextStage" class="button tiny secondary" type="button" ${isLast?'disabled':''}>${esc(isLast?t.stageComplete:t.nextStage)}</button><button id="resetStage" class="button tiny" type="button">${esc(t.resetStage)}</button></div>`;
   $('nextStage').addEventListener('click',()=>{const next=workflow.advance(contract.id);if(next){addHistory('auditStage',t[stageLabels[next]]);renderAll();}else showToast(t.stageComplete);});
   $('resetStage').addEventListener('click',()=>{workflow.reset(contract.id);addHistory('auditReset');renderAll();});
-  const timeline=$('workflowTimeline');timeline.replaceChildren();const events=workflow.getEvents(contract.id).slice().reverse();
+  const timeline=$('workflowTimeline');timeline.replaceChildren();
+  const events=workflow.getEvents(contract.id).slice().reverse();
   if(!events.length){const item=document.createElement('li');item.className='audit-event';item.textContent=t.auditEmpty;timeline.append(item);return;}
   events.forEach(event=>{const li=document.createElement('li');li.className='audit-event';const time=document.createElement('time');time.dateTime=event.at;time.textContent=formatDate(event.at);const text=document.createElement('span');text.textContent=eventText(event);li.append(time,text);timeline.append(li);});
 }
+function renderPipeline(){
+  const summary=workflow.getSummary(),active=selectedId?workflow.getStage(selectedId):'detected',root=$('pipelineTrack');root.replaceChildren();
+  workflowStages.forEach((stage,index)=>{const item=document.createElement('li');item.className='pipeline-step'+(stage===active?' active':'')+(index<workflowStages.indexOf(active)?' complete':'');item.setAttribute('aria-current',stage===active?'step':'false');const name=document.createElement('span');name.className='pipeline-step-name';name.textContent=t[stageLabels[stage]];const count=document.createElement('strong');count.className='pipeline-count';count.textContent=summary[stage]||0;item.append(name,count);root.append(item);});
+}
 function renderHistory(){
-  const root=$('historyList');root.replaceChildren();
+  const root=$('historyList');if(!root)return;root.replaceChildren();
   if(!history.length){$('history').querySelector('.section-head p').textContent=t.historyEmpty;return;}
   history.forEach(item=>{const row=document.createElement('div');row.className='history-item';row.textContent=`${formatDate(item.at)} · ${t[item.key]||item.key}${item.detail?` · ${item.detail}`:''}`;root.append(row);});
-  $('history').querySelector('.section-head p').textContent=`${history.length} · ${lang.toUpperCase()}`;
+  $('history').querySelector('.section-head p').textContent=`${history.length} · ${t.workflowLocal}`;
 }
 function renderLeakageCatalog(){
   const root=$('leakageCatalog');root.replaceChildren();
-  leakageCategories.forEach(category=>{
-    const count=category.type?demoRecords.filter(record=>record.type===category.type).length:0;
-    const button=document.createElement('button');button.type='button';button.className='leakage-category'+(category.type?' actionable':' concept');button.disabled=!category.type;
-    const title=document.createElement('strong');title.textContent=t[category.key];const status=document.createElement('span');status.textContent=category.type?`${count} · ${t.syntheticExamples}`:t.conceptOnly;button.append(title,status);
-    if(category.type)button.addEventListener('click',()=>{$('typeFilter').value=category.type;$('searchFilter').value='';renderAll();$('opportunities').scrollIntoView({behavior:'smooth',block:'start'});});root.append(button);
+  Object.entries(opportunityTypes).forEach(([type,definition])=>{
+    const count=demoRecords.filter(record=>record.type===type).length,button=document.createElement('button');button.type='button';button.className='leakage-category actionable';
+    const title=document.createElement('strong');title.textContent=typeName(type);const status=document.createElement('span');status.textContent=`${count} · ${t.demo}`;button.append(title,status);
+    button.addEventListener('click',()=>{$('typeFilter').value=type;renderAll();$('opportunities').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});});root.append(button);
   });
 }
 function renderAll(){
-  filtered=filteredRecords();if(!filtered.some(record=>record.id===selectedId))selectedId=filtered[0]?.id||null;
-  renderList();renderDossier();renderKpis();renderPipeline();renderHistory();syncMapMarkers();
+  filtered=filteredRecords();
+  if(!filtered.some(record=>record.id===selectedId))selectedId=filtered[0]?.id||null;
+  renderSummary();renderList();renderDossier();renderPipeline();renderHistory();
+  mapController?.render(filtered,selectedId);
 }
-function selectRecord(id,focusMap=false){
+function selectRecord(id,origin='list'){
   const record=demoRecords.find(item=>item.id===id);if(!record)return;
-  selectedId=id;$('locationFilter').value=record.cityId;$('sectorFilter').value=record.sector;
-  workflow.addEvent(id,'opened');renderAll();
-  if(focusMap&&mapController)focusCity(record.cityId,'city');
+  selectedId=id;workflow.addEvent(id,'opened');addHistory('auditOpened',record.id);renderAll();
+  if(origin!=='map')mapController?.focusRecord(record);
+  if(window.matchMedia('(max-width: 820px)').matches)toggleDossier(true);
 }
-function updateMapStatus(loaded){$('mapStatusText').textContent=loaded?t.mapLoaded:t.mapOff;$('mapStatusDot').classList.toggle('off',!loaded);}
-function syncMapMarkers(){if(mapController)mapController.render(filtered,selectedId);}
-function selectedCityId(){return demoRecords.find(record=>record.id===selectedId)?.cityId||cities[0].id;}
-function focusCity(cityId,view='city'){mapView=view;mapController?.setView(view,cityId);document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===view));}
-function setMapView(view){const cityId=$('locationFilter').value!=='all'&&$('locationFilter').value?$('locationFilter').value:selectedCityId();focusCity(cityId,view);}
-function currentMapLayers(){return Object.fromEntries(['markers','leakage','demand','priority','verification','risk'].map(key=>[key,document.querySelector(`[data-layer="${key}"]`).checked]));}
-async function loadMap(){
-  if(mapController)return;
-  $('loadMap').disabled=true;$('loadMapEmpty').disabled=true;$('loadMap').textContent=t.mapLoading;$('loadMapEmpty').textContent=t.mapLoading;
+function viewContext(){
+  const record=demoRecords.find(item=>item.id===selectedId)||filtered[0]||demoRecords[0];
+  return {cityId:record?.cityId,regionId:$('regionFilter').value!=='all'?$('regionFilter').value:record?.regionId,countryCode:$('countryFilter').value!=='all'?$('countryFilter').value:record?.countryCode};
+}
+function setMapView(view){
+  mapView=view;document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===view));
+  mapController?.setView(view,viewContext());
+}
+function handleCountrySelect(code,name=''){
+  const matching=cities.find(city=>city.countryCode===code);
+  if(matching){$('regionFilter').value=matching.regionId;}
+  $('countryFilter').value=code;
+  if(!$('countryFilter').querySelector(`option[value="${CSS.escape(code)}"]`)){
+    const option=document.createElement('option');option.value=code;option.textContent=name||code;$('countryFilter').append(option);
+  }
+  $('locationFilter').value='all';mapView='country';renderAll();setMapView('country');showToast(t.countryClick);
+}
+function toggleDrawer(open){
+  const drawer=$('filterDrawer'),button=$('filtersToggle');drawer.classList.toggle('open',open);drawer.setAttribute('aria-hidden',String(!open));drawer.inert=!open;button.setAttribute('aria-expanded',String(open));$('filterBackdrop').hidden=!open;
+  if(open)setTimeout(()=>$('searchFilter').focus(),40);else button.focus({preventScroll:true});
+}
+function toggleDossier(open){
+  const panel=$('dossier'),button=$('openDossier'),mobile=window.matchMedia('(max-width: 820px)').matches;
+  mobileDossierOpen=mobile&&open;panel.classList.toggle('mobile-open',mobileDossierOpen);panel.setAttribute('aria-hidden',String(mobile&&!mobileDossierOpen));panel.inert=mobile&&!mobileDossierOpen;
+  button.setAttribute('aria-expanded',String(mobileDossierOpen));button.querySelector('.preview-label').textContent=mobileDossierOpen?t.closeDossier:t.openDossier;
+  if(mobileDossierOpen)panel.querySelector('.dossier-close')?.focus({preventScroll:true});else if(mobile)button.focus({preventScroll:true});
+}
+function syncDossierLayout(){
+  const mobile=window.matchMedia('(max-width: 820px)').matches,panel=$('dossier'),close=$('closeDossier');
+  if(mobile){if(close.parentElement!==panel.querySelector('.dossier-heading'))panel.querySelector('.dossier-heading').append(close);panel.setAttribute('aria-hidden',String(!mobileDossierOpen));panel.inert=!mobileDossierOpen;panel.classList.toggle('mobile-open',mobileDossierOpen);}
+  else{if(close.parentElement!==document.querySelector('.map-foot'))document.querySelector('.map-foot').append(close);panel.classList.remove('mobile-open');panel.setAttribute('aria-hidden','false');panel.inert=false;mobileDossierOpen=false;}
+  $('openDossier').hidden=!mobile;
+  if(mobile)$('openDossier').querySelector('.preview-label').textContent=mobileDossierOpen?t.closeDossier:t.openDossier;
+  requestAnimationFrame(()=>{mapController?.invalidateSize();if(mapView==='world')mapController?.setView('world');});
+}
+function updateCheckProgress(){
+  const count=document.querySelectorAll('.evidence-check:checked').length;
+  $('checkProgress').innerHTML=`${count} / 4 · <span>${esc(t.checklistProgress)}</span>`;
+}
+function showToast(message){
+  const toast=$('toast');toast.textContent=message;toast.hidden=false;clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>toast.hidden=true,2300);
+}
+function resetFilters(){
+  ['regionFilter','countryFilter','locationFilter','sectorFilter','typeFilter','priorityFilter'].forEach(id=>$(id).value='all');$('searchFilter').value='';mapView='world';renderAll();setMapView('world');addHistory('historyFilter');
+}
+function bindFilterEvents(){
+  ['searchFilter','regionFilter','countryFilter','locationFilter','sectorFilter','typeFilter','priorityFilter'].forEach(id=>$(id).addEventListener(id==='searchFilter'?'input':'change',()=>{
+    if(id==='regionFilter'){
+      if($('regionFilter').value==='all'){$('countryFilter').value='all';$('locationFilter').value='all';mapView='world';}
+      else{$('countryFilter').value='all';$('locationFilter').value='all';mapView='region';}
+    }
+    if(id==='countryFilter'){
+      if($('countryFilter').value==='all'){$('locationFilter').value='all';mapView=$('regionFilter').value==='all'?'world':'region';}
+      else{$('locationFilter').value='all';const city=cities.find(item=>item.countryCode===$('countryFilter').value);if(city)$('regionFilter').value=city.regionId;mapView='country';}
+    }
+    if(id==='locationFilter'){
+      if($('locationFilter').value==='all')mapView=$('countryFilter').value!=='all'?'country':$('regionFilter').value!=='all'?'region':'world';
+      else{const city=cityById($('locationFilter').value);$('regionFilter').value=city.regionId;$('countryFilter').value=city.countryCode;mapView='city';}
+    }
+    renderAll();if(['regionFilter','countryFilter','locationFilter'].includes(id))setMapView(mapView);
+    if(id!=='searchFilter')addHistory('historyFilter');
+  }));
+  $('clearFilters').addEventListener('click',resetFilters);
+  $('filtersToggle').addEventListener('click',()=>toggleDrawer(true));$('closeFilters').addEventListener('click',()=>toggleDrawer(false));$('filterBackdrop').addEventListener('click',()=>toggleDrawer(false));
+}
+function prepareDraft(){
+  const record=demoRecords.find(item=>item.id===selectedId);if(!record)return;
+  const scored=recordScore(record),city=scored.city,signal=typeInfo(record.type);
+  const text=[t.draftSubject,`${t.opportunityId}: ${record.id}`,`${t.location}: ${cityName(city)}, ${countryName(city)}`,`${t.opportunityType}: ${typeName(record.type)}`,`${t.draftValueLabel}: ${money(scored.low,lang)}–${money(scored.high,lang)} ${t.draftAssumptionNote}`,`${t.draftNextStepLabel}: ${signal.action[lang]}`,t.draftGuardrail,t.draftNoContact].join('\n');
+  $('draftText').value=text;$('draftPanel').hidden=false;workflow.addEvent(record.id,'draft');addHistory('historyDraft');$('draftText').focus();
+}
+async function copyDraft(){
+  const area=$('draftText');area.select();
+  try{await navigator.clipboard.writeText(area.value);showToast(t.copied);}catch{showToast(t.copyManual);}
+}
+async function runDemoScan(){
+  const button=$('refreshScenario'),status=$('scanStatus'),text=$('scanStatusText'),progress=$('scanProgress');
+  if(button.disabled)return;
+  const phases=['scanPhaseInitialize','scanPhaseSearch','scanPhaseGroup','scanPhaseReady'];
+  const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  button.disabled=true;status.hidden=false;progress.value=0;
+  for(let index=0;index<phases.length;index++){
+    text.textContent=t[phases[index]];progress.value=Math.round((index+1)*100/phases.length);
+    if(!reduced)await new Promise(resolve=>setTimeout(resolve,170));
+  }
+  // Deterministic loop through local fixtures; not a random or live discovery.
+  const currentIndex=Math.max(0,demoRecords.findIndex(record=>record.id===selectedId));
+  const next=demoRecords[(currentIndex+1)%demoRecords.length];
+  resetFilters();selectedId=next.id;addHistory('historyScan',next.id);renderAll();
+  setTimeout(()=>{status.hidden=true;progress.value=0;button.disabled=false;},reduced?120:600);
+}
+function toggleTiles(){
+  const button=$('tilesToggle'),enabled=button.getAttribute('aria-pressed')!=='true';
+  if(!mapController?.setTilesEnabled(enabled))return;
+  button.setAttribute('aria-pressed',String(enabled));button.textContent=enabled?t.tilesOn:t.tilesOff;
+  $('tileNotice').classList.toggle('visible',enabled);$('tilePrivacyHint').textContent=enabled?t.tilePrivacy:t.tileDefaultNote;$('mapMessage').textContent=enabled?t.tilePrivacy:t.mapPrivacyLocal;
+}
+function toggleFullscreen(force){
+  const shell=$('map').closest('.map-shell'),enabled=typeof force==='boolean'?force:!shell.classList.contains('fullscreen');
+  mapController?.setFullscreen(enabled);$('fullscreenMap').textContent=enabled?t.exitFullscreen:t.fullscreen;$('fullscreenMap').setAttribute('aria-pressed',String(enabled));
+  if(enabled)document.body.classList.add('map-is-fullscreen');else document.body.classList.remove('map-is-fullscreen');
+}
+function bindActions(){
+  document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>setMapView(button.dataset.view)));
+  $('resetMap').addEventListener('click',()=>{setMapView('world');showToast(t.resetMap);});
+  $('fullscreenMap').addEventListener('click',()=>toggleFullscreen());
+  $('tilesToggle').addEventListener('click',toggleTiles);
+  $('refreshScenario').addEventListener('click',runDemoScan);
+  $('exploreExample').addEventListener('click',()=>{
+    const current=Math.max(0,demoRecords.findIndex(record=>record.id===selectedId));const next=demoRecords[(current+1)%demoRecords.length];resetFilters();selectRecord(next.id,'list');
+  });
+  $('openDossier').addEventListener('click',()=>toggleDossier(!mobileDossierOpen));$('closeDossier').addEventListener('click',()=>toggleDossier(false));
+  $('prepareDraft').addEventListener('click',prepareDraft);$('copyDraft').addEventListener('click',copyDraft);$('closeDraft').addEventListener('click',()=>{$('draftPanel').hidden=true;});
+  $('markReviewed').addEventListener('click',()=>{if(!selectedId)return;workflow.addEvent(selectedId,'review');addHistory('reviewedLocal');$('reviewState').textContent=t.reviewedLocal;showToast(t.reviewedLocal);});
+  document.querySelectorAll('.evidence-check').forEach((input,index)=>input.addEventListener('change',()=>{
+    if(!selectedId)return;let checks=reviewChecks.get(selectedId);if(!checks){checks=new Set();reviewChecks.set(selectedId,checks);}input.checked?checks.add(index):checks.delete(index);workflow.addEvent(selectedId,'review');updateCheckProgress();
+  }));
+  $('demoInfo').addEventListener('click',()=>$('demoInfoDialog').showModal());$('closeInfo').addEventListener('click',()=>$('demoInfoDialog').close());
+  $('demoInfoDialog').addEventListener('click',event=>{if(event.target===$('demoInfoDialog'))$('demoInfoDialog').close();});
+  $('navToggle').addEventListener('click',()=>{const open=$('navToggle').getAttribute('aria-expanded')!=='true';$('navToggle').setAttribute('aria-expanded',String(open));$('mainNav').classList.toggle('open',open);});
+  document.querySelectorAll('#mainNav a').forEach(link=>link.addEventListener('click',()=>{$('mainNav').classList.remove('open');$('navToggle').setAttribute('aria-expanded','false');}));
+  $('languageSelect').value=lang;$('languageSelect').addEventListener('change',()=>{
+    lang=$('languageSelect').value;t=applyLanguage(lang);initFilters();renderAll();mapController?.updateLabels(mapLabels());$('tilesToggle').textContent=$('tilesToggle').getAttribute('aria-pressed')==='true'?t.tilesOn:t.tilesOff;$('tilePrivacyHint').textContent=$('tilesToggle').getAttribute('aria-pressed')==='true'?t.tilePrivacy:t.tileDefaultNote;$('mapMessage').textContent=$('tilesToggle').getAttribute('aria-pressed')==='true'?t.tilePrivacy:t.mapPrivacyLocal;$('fullscreenMap').textContent=$('map').closest('.map-shell').classList.contains('fullscreen')?t.exitFullscreen:t.fullscreen;$('openDossier').querySelector('.preview-label').textContent=mobileDossierOpen?t.closeDossier:t.openDossier;
+  });
+  window.addEventListener('resize',syncDossierLayout,{passive:true});
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'){
+      if($('map').closest('.map-shell').classList.contains('fullscreen'))toggleFullscreen(false);
+      else if(mobileDossierOpen)toggleDossier(false);
+      else if($('filterDrawer').classList.contains('open'))toggleDrawer(false);
+    }
+  });
+}
+async function initialize(){
+  initFilters();bindFilterEvents();bindActions();renderLeakageCatalog();
+  syncDossierLayout();
   try{
-    mapController=await new OpportunityMap({containerId:'map',records:filtered,layers:currentMapLayers(),labels:t,selectedId,onSelect:id=>selectRecord(id,true),onTileError:()=>{mapTileErrors++;if(mapTileErrors===3)showToast(t.mapError);}}).mount(mapView,selectedCityId());
-    $('mapPlaceholder').hidden=true;updateMapStatus(true);syncMapMarkers();
-  }catch(error){mapController=null;$('mapPlaceholder').hidden=false;showToast(t.mapError);}
-  finally{$('loadMap').disabled=false;$('loadMapEmpty').disabled=false;$('loadMap').textContent=t.loadMap;$('loadMapEmpty').textContent=t.loadMap;}
+    mapController=await new OpportunityMap({containerId:'map',records:demoRecords,selectedId,onSelect:selectRecord,onCountrySelect:handleCountrySelect,onTileError:()=>showToast(t.mapError),labels:mapLabels()}).mount();
+  }catch(error){$('mapMessage').textContent=t.mapError;$('mapStatusText').textContent=t.mapError;$('mapStatusText').classList.add('error');console.error('Eagle Eye local map:',error);}
+  renderAll();
 }
-function resetMap(){if(mapController)mapController.resetView(mapView,$('locationFilter').value!=='all'&&$('locationFilter').value?$('locationFilter').value:selectedCityId());else setMapView('city');}
-function toggleFullscreen(){const wrap=$('map').parentElement;const active=wrap.classList.toggle('map-fullscreen');document.body.classList.toggle('map-fullscreen-active',active);$('fullscreenMap').textContent=active?t.exitFullscreen:t.fullscreen;mapController?.map?.invalidateSize();}
-function refreshScenario(){
-  if(!filtered.length){showToast(t.noResults);return;}
-  selectedId=filtered[0].id;const record=demoRecords.find(item=>item.id===selectedId);$('locationFilter').value=record.cityId;$('sectorFilter').value=record.sector;
-  renderAll();focusCity(record.cityId,'city');addHistory('historyScan',`${cityName(cities.find(item=>item.id===record.cityId))} · ${sectorName(record.sector)}`);
-}
-function showToast(message){const toast=$('toast');toast.textContent=message;toast.hidden=false;clearTimeout(showToast.timer);showToast.timer=setTimeout(()=>toast.hidden=true,2400);}
-function updateChecklist(){const count=document.querySelectorAll('.evidence-check:checked').length;$('checkProgress').firstChild.textContent=String(count);if(selectedId)workflow.addEvent(selectedId,'review');renderDossierWorkflow(selectedId?contractFor(demoRecords.find(record=>record.id===selectedId)):null);}
-function openDraft(){
-  const record=demoRecords.find(item=>item.id===selectedId);if(!record)return;const score=recordScore(record),city=score.city;
-  $('draftText').value=`${t.draftSubject}\n\n${t.draftScenarioLabel}: ${sectorName(record.sector)} · ${cityName(city)}\n${t.draftValueLabel}: ${money(score.low)}–${money(score.high)} · ${t.monthly} (${t.draftAssumptionNote}).\n\n${t.draftNextStepLabel}: ${t[record.actionKey]} ${t.draftGuardrail}\n\n${t.draftNoContact}`;
-  $('draftPanel').hidden=false;$('reviewState').textContent=t.notReviewed;workflow.addEvent(record.id,'draft');addHistory('historyDraft',cityName(city));renderDossierWorkflow(contractFor(record));
-}
-function changeLanguage(next){
-  lang=translations[next]?next:'en';t=applyLanguage(lang);$('languageSelect').value=lang;
-  const citySelect=$('locationFilter'),value=citySelect.value;citySelect.querySelectorAll('option:not(:first-child)').forEach(option=>option.remove());
-  cities.forEach(city=>{const option=document.createElement('option');option.value=city.id;option.textContent=cityName(city);citySelect.append(option);});citySelect.value=value;
-  document.querySelectorAll('[data-layer]').forEach(input=>{const key={markers:'layerSignals',leakage:'layerLeakage',demand:'layerDemand',priority:'mapPriority',verification:'mapVerification',risk:'mapRisk'}[input.dataset.layer];input.closest('label').lastElementChild.textContent=t[key];});
-  $('mapMarkerNotice').textContent=t.markerNotice;
-  $('fullscreenMap').textContent=document.querySelector('.map-wrap').classList.contains('map-fullscreen')?t.exitFullscreen:t.fullscreen;
-  if(mapController){mapController.updateLabels(t);updateMapStatus(true);}renderLeakageCatalog();renderAll();
-}
-
-initFilters();$('languageSelect').value=lang;changeLanguage(lang);
-$('searchFilter').addEventListener('input',renderAll);
-['locationFilter','sectorFilter','typeFilter','priorityFilter','verificationFilter'].forEach(id=>$(id).addEventListener('change',()=>{renderAll();addHistory('historyFilter');if(id==='locationFilter'&&mapController&&$('locationFilter').value!=='all')focusCity($('locationFilter').value,'city');}));
-$('clearFilters').addEventListener('click',()=>{$('searchFilter').value='';$('locationFilter').value='all';$('sectorFilter').value='all';$('typeFilter').value='all';$('priorityFilter').value='all';$('verificationFilter').value='unverified';renderAll();});
-$('languageSelect').addEventListener('change',event=>changeLanguage(event.target.value));
-$('loadMap').addEventListener('click',loadMap);$('loadMapEmpty').addEventListener('click',loadMap);$('resetMap').addEventListener('click',resetMap);$('fullscreenMap').addEventListener('click',toggleFullscreen);
-$('refreshScenario').addEventListener('click',refreshScenario);
-document.querySelectorAll('[data-layer]').forEach(input=>input.addEventListener('change',()=>{if(mapController)mapController.updateLayers(currentMapLayers());}));
-document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>setMapView(button.dataset.view)));
-document.querySelectorAll('.evidence-check').forEach(input=>input.addEventListener('change',updateChecklist));
-$('prepareDraft').addEventListener('click',openDraft);$('closeDraft').addEventListener('click',()=>{$('draftPanel').hidden=true;});
-$('copyDraft').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('draftText').value);showToast(t.copied);}catch{$('draftText').select();showToast(t.copyManual);}});
-$('markReviewed').addEventListener('click',()=>{$('reviewState').textContent=t.reviewedLocal;if(selectedId)workflow.addEvent(selectedId,'review');addHistory('reviewedLocal');renderDossierWorkflow(selectedId?contractFor(demoRecords.find(record=>record.id===selectedId)):null);});
-$('demoInfo').addEventListener('click',()=>{const dialog=$('demoDialog');if(dialog.showModal)dialog.showModal();else dialog.setAttribute('open','');});$('closeDemoInfo').addEventListener('click',()=>$('demoDialog').close());
-$('demoDialog').addEventListener('click',event=>{if(event.target===$('demoDialog'))$('demoDialog').close();});
-document.addEventListener('keydown',event=>{if(event.key==='Escape'&&document.querySelector('.map-wrap').classList.contains('map-fullscreen'))toggleFullscreen();});
-renderLeakageCatalog();renderAll();
+initialize();

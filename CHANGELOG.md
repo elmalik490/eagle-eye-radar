@@ -14,3 +14,12 @@
 - Completed new UX translations for all six languages; retained Arabic RTL; refined compact navigation, dossier, status labels and responsive layers.
 - Local Playwright/Chromium: seven viewport widths without horizontal overflow; all six dictionaries/key sets complete; search, taxonomy, evidence-unverified behavior, draft, stage advance/reset, timeline and locale/RTL checks passed; map controls/three markers/six overlays and Miami dossier sync passed. No JS exceptions or console errors. OSM tile requests were intercepted and locally fulfilled during this Phase 3 test; no external network egress occurred.
 - No real-data connector, backend, CRM, automation, outbound contact, payment or durable approval/audit record was added. The Phase 3 implementation commit `016aab34e543d566ced34d88535294f9650220d1` was deployed successfully; its Pages run and commit-specific public resources were verified.
+
+## 2026-10-08 — Phase 4.2: World Radar foundation (local candidate)
+- Preserved the existing page, static Pages deployment and Leaflet architecture; reorganized the experience around a local world map rather than replacing the prototype.
+- Added simplified Natural Earth boundary geometry and 12 fictional public-city anchors across six broad regions; World/Region/Country/City views and map/list/dossier synchronization.
+- Kept raster OpenStreetMap tiles off by default. Added a visible pre-click notice describing the visible-tile request and confirming that no Eagle Eye opportunity records are sent; attribution remains visible.
+- Reworked the phone-first screen to bring the map earlier in the viewport; added compact mobile controls, a right-side filter drawer and a collapsible dossier sheet. Tuned the drawer to remain closed across LTR/RTL language changes.
+- Upgraded the adapter to v2; made value assumptions and deterministic demo priority explicit and separate from evidence/verification; labelled demand/urgency/scope dimensions as demo.
+- Local Chromium/Playwright: 7 viewport widths without horizontal overflow; six languages, Arabic RTL, map scopes/selection/fullscreen, local verification/workflow/draft, reduced motion, and no default external requests. Optional OSM tile request was intercepted before network egress; no page exceptions or non-test console errors.
+- **Publication not yet verified at this entry's authoring point.** Confirm the exact Pages run and update status/handover before claiming the phase is live. No real-data connector, business contact, external message, payment or automated action was added.

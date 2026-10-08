@@ -1,19 +1,19 @@
 # Roadmap and Safe Next Steps
 
-This roadmap separates the shipped static-product foundation from future product decisions. It does not authorize prospect outreach, access to new data sources, account changes, payments or other external activity.
+This roadmap separates the current synthetic product foundation from future product decisions. It does not authorize prospect outreach, new source access, payments, account changes or other external activity.
 
-## Current milestone — Phase 3 product/workflow foundation
+## Current milestone — Phase 4.2 local World Radar foundation
 
-The existing one-page GitHub Pages app now has an opportunity contract, evidence-first dossier, heuristic-score explanation, data-readiness separation, leakage taxonomy, local session pipeline and timeline, a six-language command center, and a synchronized synthetic opportunity map. Phase 3 was deployed at `016aab34e543d566ced34d88535294f9650220d1`; its Pages workflow succeeded and the live page was checked. This is a UI and architecture prototype only; it does not demonstrate that leakage exists or that a business can recover money.
+The existing one-page GitHub Pages app now has a local world-boundary backdrop, 12 synthetic city anchors, selectable map scopes, synchronized search/list/dossier, compact mobile-first map presentation, six localized languages and Arabic RTL. The versioned v2 opportunity shape separates evidence and verification from hypotheses, scenario assumptions and demo ranking. Raster OSM tiles remain an explicit user opt-in. Local browser checks passed; GitHub Pages must still be checked against the exact commit after it is pushed. This is a UI and architecture prototype; it does not demonstrate real leakage or recoverable money.
 
 ## Highest-value next work (ranked)
 
 | Rank | Improvement | Value | Effort | Risk | Safe first step |
-|---|---|---|---|---|---|
-| 1 | Validate one narrow revenue-leakage job-to-be-done and baseline using owner-approved, private, consented internal records; define a concrete success and false-positive measure | High | Medium | Low–Medium | Agree on one use case, denominator, time window and fields before sharing or processing any private data; keep that data outside this public repository. |
-| 2 | Choose one lawful, permitted real source and specify its connector/evidence contract: source IDs/citations, observation time, scope, uncertainty, correction/removal, retention and permissions | High | Medium–High | High | Make source and authorization decisions first; use a mock adapter or a sample explicitly approved for testing until then. |
-| 3 | Calibrate and evaluate opportunity priority against reviewed outcomes, keeping signal strength, potential impact, evidence quality and uncertainty separately visible | High | High | High | Define labeled outcomes, time horizon, acceptable precision/recall or review yield, and a human-reviewed holdout before changing a score. |
+|---:|---|---|---|---|---|
+| 1 | Validate one narrow revenue-leakage job-to-be-done and its baseline/outcome using owner-approved, private, consented records | High | Medium | Low–Medium | Agree on a single workflow, denominator, time window, exclusions and success/false-positive measure before processing data; keep private records outside this public repository. |
+| 2 | Select one lawful, permitted real source and specify its evidence/connector contract | High | Medium–High | High | Decide permission, provenance, IDs/citations, observation time, scope, uncertainty, correction/removal, retention and access first; prototype with synthetic or explicitly approved sample data. |
+| 3 | Evaluate and calibrate priority against human-reviewed outcomes | High | High | High | Define labels, time horizon, holdout, review-yield/precision targets and how evidence strength, potential impact and uncertainty stay separately visible before changing score weights. |
 
 ## Later production foundations
 
-A secure backend, identity and tenant isolation, access controls, durable approval/audit history, retention/removal, monitoring, job failure handling and constrained automation are necessary before multi-user/real-data use. A production tile provider or self-hosted basemap must be selected with allowed terms, reliability, capacity and cost before commercial-scale reliance. CRM or outbound action comes only after reviewed evidence, scope, exact content and approval gates are designed. No such work or outreach is part of this milestone.
+A backend, authentication and tenant isolation, access controls, durable evidence/approval/audit history, privacy/retention, monitoring, job failure handling and constrained automation are necessary before multi-user/real-data use. Select permitted map infrastructure with appropriate terms, reliability, capacity and cost before commercial-scale use. CRM or outbound action comes only after authorized evidence, exact scope/content and explicit approval gates are designed. None of these production integrations is part of the current milestone.

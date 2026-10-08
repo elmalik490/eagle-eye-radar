@@ -1,0 +1,35 @@
+# Revenue Leakage Workflow and Commercial Validation (سير عمل Revenue Leakage والتحقق التجاري)
+
+Revenue leakage is best treated as a **control-and-evidence problem**, not as a guessed percentage of lost sales. Stripe defines revenue recovery as actions to regain lost or at-risk income and lists failed payments, customer turnover, inefficient billing, weak receivables follow-up, contract/terms failures, and service-delivery problems as possible causes.[1] For service businesses, the same logic applies earlier in the funnel: an inbound request can become a *suspected* leak when it is not routed, answered, quoted, scheduled, delivered, invoiced, or collected in a traceable way. That is a product framing, not a claim that every unworked lead represents lost revenue.
+
+## Evidence-led workflow
+
+1. **Define the expected commercial event.** For each channel and service, record the business rule: what counts as an inbound request, operating hours, response target, qualification status, quote validity, service completion, invoice trigger, payment terms, and cancellation/write-off authority. GFOA recommends a documented revenue-control policy, annual review, timely billing after service delivery, receivables aging, collection procedures, and investigation of significant actual-versus-forecast variance.[2] SEC guidance similarly says revenue evidence depends on an arrangement, delivery or rendered service, fixed/determinable price, and reasonably assured collectibility; the evidence may be a signed contract, binding purchase order, or binding electronic authorization.[3]
+
+2. **Join the event chain, preserving provenance.** Capture source message/form/call timestamp; consent and contact details; assignment/owner and queue; first response and all follow-up attempts; qualification/disqualification reason; quote/version and acceptance; appointment/job completion; invoice, payment, refund, credit, and write-off events. Use immutable IDs and timestamps, and show the raw record beside each alert. Stripe exposes payment-failure webhooks, attempt counts, and next-attempt dates.[4][5] This supports an auditable “who owned what, when, and what happened next” record.
+
+3. **Detect exceptions, not losses.** Alert on missing handoffs (unassigned request, no first response, quote expired without disposition), inconsistent states (service marked complete but no invoice), or abnormal outcomes (invoice overdue, repeated failed payment, unexpected refund/discount). Stripe’s official analytics separates failed volume, failure rate, recovered volume, recovery rate, in-recovery volume, and decline reason; its denominator is recurring subscription payment volume and excludes the first post-trial invoice.[6] Eagle Eye should copy this discipline: every KPI must state population, time window, event definition, and whether the amount is *at risk*, *recovered*, or merely *estimated*.
+
+4. **Commercially validate before action.** A human owner should inspect the source evidence and choose: confirmed leak, valid exception, duplicate/spam, unreachable or non-consenting contact, customer-caused delay, capacity/no-fit, contractual exclusion, or insufficient evidence. Hard payment declines are a concrete false-positive guardrail: Stripe says it does not retry certain issuer codes and requires a new payment method.[5] A quote or inquiry is not recognized revenue merely because it exists; SEC guidance rejects recognition when required customer execution or later approval is incomplete.[3]
+
+5. **Recover with bounded playbooks.** Low-risk, reversible actions can be automated: assign/notify, send an approved acknowledgement, create a follow-up task, retry eligible payments, or request updated payment details. High-risk actions—discounts, refunds, contract changes, service promises, collection escalation, cancellation, or recognition of revenue—require authorized human approval. Stripe supports Smart Retries, custom retry schedules, customer emails, no-code automations, and segmentation, while also documenting retry exclusions and terminal subscription states.[4][5] This is a useful model for policy-based automation with explicit stop conditions, not a reason to automate every alert.
+
+## Baselines, value, and controls
+
+Start with the customer’s own trailing baseline by channel, service, owner, hour/day, and cohort: median time-to-first-response, response coverage, follow-up completion, quote-to-booking, completed-service-to-invoice lag, first-attempt failure, recovery, refunds, and write-offs. The Harvard Business Review study reports that most companies were not responding fast enough to online leads, but the accessible article does not expose enough method detail to justify importing popular “5-minute” or conversion-multiple claims; use it as directional evidence and measure the customer’s own before/after performance.[7] Do not publish a market loss estimate without an observed denominator and counterfactual.
+
+Measure value in a ledger: **confirmed cash recovered + incremental gross margin from validated bookings − discounts, refunds, outreach, payment, and staff costs**. Keep “amount at risk,” “expected value,” and “cash recovered” separate. Report precision (confirmed leaks / reviewed alerts), false-positive rate, time-to-resolution, recurrence, and control exceptions alongside revenue. The IIA’s continuous-auditing guidance recommends reviewing anomalies and management response, root-cause analysis, an owner and tracked remediation plan, and subsequent monitoring of whether remediation persists.[8] GFOA and COSO also support documented controls, segregation of duties, reconciliation, and monitoring.[2][9]
+
+**Product judgment:** Eagle Eye Radar should present an evidence card, confidence/reason code, estimated amount with formula, affected stage, owner, next safe action, approval requirement, and resolution outcome. It should default to “suspected leakage,” learn from disposition labels, and never infer a lead list, company loss, or commercial demand from missing data alone.
+
+## References
+
+[1]: https://stripe.com/resources/more/revenue-recovery-101 "Revenue recovery 101: A playbook for businesses"
+[2]: https://www.gfoa.org/materials/revenue-control-policy "Revenue Control Policy"
+[3]: https://www.sec.gov/interps/account/sabcodet13.htm "SEC Staff Accounting Bulletin Topic 13: Revenue Recognition"
+[4]: https://docs.stripe.com/billing/revenue-recovery "Revenue recovery"
+[5]: https://docs.stripe.com/billing/revenue-recovery/smart-retries "Automate payment retries"
+[6]: https://docs.stripe.com/billing/revenue-recovery/recovery-analytics "Revenue recovery analytics"
+[7]: https://hbr.org/2011/03/the-short-life-of-online-sales-leads "The Short Life of Online Sales Leads"
+[8]: https://www.theiia.org/globalassets/documents/content/articles/guidance/gtag/gtag-3-continuous-auditing/gtag-3-continuous-auditing-2nd-edition.pdf "GTAG: Continuous Auditing, 2nd Edition"
+[9]: https://www.coso.org/guidance-on-ic "Internal Control—Integrated Framework"

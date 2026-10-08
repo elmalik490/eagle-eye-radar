@@ -1,0 +1,31 @@
+# تكبير البيانات الجغرافية والعلامات والتجميع
+
+## Evidence note
+
+**Sourced findings.** Map zoom is a scale change, not merely a cosmetic control: Mapbox defines 23 levels (0–22), with level 0 showing Earth, level 3 a continent, level 10 large roads, and level 15 buildings [1]. Density is therefore relative to scale: Esri notes that the same points can be dense when zoomed out and dispersed when zoomed in [2]. This supports a progressive world → country → city representation instead of one fixed marker style.
+
+For overlapping points, clustering groups nearby features into one symbol, typically sizing it by count. ArcGIS clustering is dynamic: zooming out produces fewer, larger groups; zooming in produces more groups and eventually individual points. Its cluster radius controls how many features are grouped, and labels/pop-ups can expose counts and summary statistics [3]. Mapbox’s official example makes the same pattern concrete with `clusterMaxZoom`, `clusterRadius`, an abbreviated point count, and a click-to-`getClusterExpansionZoom` interaction that zooms to the next meaningful detail level [4]. Clustering is thus good for “how many/where are groups?” but it hides the identity of individual records until the user expands a group.
+
+Heatmaps are a different aggregation: Esri describes them as a raster surface emphasizing relative point density, optionally weighted by a numeric value; it explicitly advises avoiding them for only a few points and limiting them to the scale levels where they remain meaningful [2]. Mapbox demonstrates zoom-dependent radius, intensity, weighting, and a transition from heatmap to circles [5]. This is useful for a future dense synthetic fixture, but a heatmap should not imply a continuous field where observations are sparse.
+
+Choropleths answer a different question: a numeric or categorical value attached to predefined administrative units. The European Data Portal recommends normalizing values (for example, per population), using sequential palettes for magnitude and diverging palettes around a meaningful center, and using equal-area projections for world choropleths; it warns that bivariate choropleths are harder to interpret [6]. Choropleths are therefore appropriate for country summaries, not for plotting nine point records.
+
+Uncertainty must be made visible rather than silently discarded. A peer-reviewed map study found that texture-based uncertainty changed participants’ decision strategy by about 30% in its landing-site scenario, even though accuracy did not improve [7]. The result is context-specific, not a universal effect, but it is a strong reason to label the uncertainty type and include the value in the detail view. Minnesota’s government map guidance also recommends defining colors in alternative text and a legend, and recommends testing focus, contrast, and manual keyboard use [8].
+
+**Product judgment for Eagle Eye Radar.** For the current nine-record demo, the smallest useful representation is **nine individually selectable markers plus a compact synchronized record list/count**. Do not add a heatmap or choropleth: the points are few, and the ArcGIS guidance says heatmaps should be avoided for few points [2]. If two records share a pixel or coordinate, use a small count badge or an explicit “N records here” selection surface rather than silently hiding one. Keep marker identity in the list so the same task remains possible without precise pointer placement.
+
+For the future synthetic global fixture, use one deterministic dataset that deliberately includes: globally sparse outliers, several coincident or near-coincident urban points, regional/country clusters, and optional numeric magnitude plus uncertainty fields. At low zoom, show count-bearing clusters or equal-area country bins only when the data has been aggregated to an administrative measure; at medium zoom, allow cluster expansion and optionally a density/weighted heatmap for genuinely dense point groups; at city/high zoom, transition to individually selectable points. Tune thresholds against the fixture rather than assuming a universal zoom number, because density changes with scale [2]. Keep a visible mode/legend label such as “cluster count,” “density,” or “country rate” so aggregation is not mistaken for raw records.
+
+**Interaction and accessibility pattern.** Provide explicit `+`/`−` controls and keyboard equivalents for zoom and pan. Minnesota recommends keyboard map navigation and single-finger alternatives to pinch or path gestures [8]; WCAG 2.2 requires all functionality to be operable through a keyboard interface [9]. Make clusters and markers focusable, open their summary/detail on Enter/Space, and offer a list fallback with the same selection state. Never encode severity or uncertainty with color alone; pair color with count, label, texture, or text. These are implementation recommendations grounded in [2], [8], and [9], while the specific nine-record and fixture choices are Eagle Eye product judgment.
+
+## References
+
+[1]: https://docs.mapbox.com/help/glossary/zoom-level/ "Mapbox, ‘zoom level’"
+[2]: https://doc.arcgis.com/en/arcgis-online/reference/best-practices-high-density-data.htm "ArcGIS Online Help, ‘Best practices for visualizing high-density data’"
+[3]: https://doc.arcgis.com/en/arcgis-online/create-maps/configure-clustering-mv.htm "ArcGIS Online Help, ‘Configure clustering’"
+[4]: https://docs.mapbox.com/mapbox-gl-js/example/cluster/ "Mapbox, ‘Create and style clusters’"
+[5]: https://docs.mapbox.com/mapbox-gl-js/example/heatmap-layer/ "Mapbox, ‘Create a heatmap layer’"
+[6]: https://data.europa.eu/apps/data-visualisation-guide/choropleth-maps "European Data Portal, ‘Choropleth maps’"
+[7]: https://www.frontiersin.org/journals/computer-science/articles/10.3389/fcomp.2020.00032/full "Korporaal, Ruginski & Fabrikant, ‘Effects of Uncertainty Visualization on Map-Based Decision Making Under Time Pressure’"
+[8]: https://mn.gov/mnit/assets/Accessibility%20Guide%20for%20Interactive%20Web%20Maps_tcm38-403564.pdf "Minnesota IT Services, ‘Accessibility Guide for Interactive Web Maps’"
+[9]: https://www.w3.org/WAI/WCAG22/Understanding/keyboard.html "W3C WAI, ‘Understanding SC 2.1.1 Keyboard’"

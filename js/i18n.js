@@ -19,6 +19,8 @@ export const translations = {
   }
 };
 export const languageNames = { en:'🇬🇧 English', fr:'🇫🇷 Français', ar:'🇩🇿 العربية', ru:'🇷🇺 Русский', zh:'🇨🇳 中文', ko:'🇰🇷 한국어' };
+import { worldRadarTranslations } from './world-radar-i18n.js';
+for (const code of Object.keys(translations)) Object.assign(translations[code], worldRadarTranslations[code] || {});
 export function getLanguage() { const saved = localStorage.getItem('eagle-eye-language'); return translations[saved] ? saved : 'en'; }
 export function applyLanguage(language) {
   const lang = translations[language] ? language : 'en';
