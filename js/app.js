@@ -4,6 +4,7 @@ import { getLanguage, applyLanguage } from './i18n.js';
 import { OpportunityMap } from './map-view.js';
 import { toOpportunityContract } from './opportunity-contract.js';
 import { DemoWorkflow, workflowStages } from './demo-workflow.js';
+import { WorldGlobe } from './globe-view.js';
 
 let lang=getLanguage();
 let t=applyLanguage(lang);
@@ -11,6 +12,9 @@ let selectedId=demoRecords[0]?.id||null;
 let filtered=[];
 let history=[];
 let mapController=null;
+let globeController=null;
+let visualMode='map';
+let globeStatusCode='ready';
 let mapView='world';
 let mobileDossierOpen=false;
 const sessionStartedAt=new Date().toISOString();
@@ -102,20 +106,23 @@ function renderDossier(){
   if(!record){const empty=document.createElement('div');empty.className='empty';empty.textContent=t.dossierPrompt;root.append(empty);$('dossierWorkflow').replaceChildren();$('workflowTimeline').replaceChildren();$('selectedPreviewText').textContent=t.dossierPrompt;return;}
   const contract=contractFor(record),scored=recordScore(record),city=scored.city,signal=typeInfo(record.type),checks=reviewChecks.get(record.id)||new Set();
   const priorityText=t[priorityKey[scored.priorityBand]];
-  const top=`<div class="dossier-top"><div><h2>${esc(typeName(record.type))}</h2><p>${esc(cityName(city))}, ${esc(countryName(city))} · ${esc(regionName(city.regionId))}</p></div><span class="badge">${esc(t.demo)}</span></div>`;
-  const identity=`<div class="dossier-metadata">${metric(t.opportunityId,`<code>${esc(record.id)}</code>`)}${metric(t.sector,esc(sectorName(record.sector)))}${metric(t.evidence,`<span class="badge red">${esc(t.unverified)}</span>`)}${metric(t.confidenceNotAssessed,esc(t.notAssessed))}</div>`;
+  const claimKeys={FACT:'claimFact',VERIFIED:'claimVerified',LIKELY:'claimLikely',HYPOTHESIS:'claimHypothesis',UNVERIFIED:'claimUnverified',CONFLICTING:'claimConflicting'};
+  const claims=(contract.evidence.claims||[]).map(claim=>`<span class="claim-chip" data-state="${esc(claim.state)}">${esc(t[claimKeys[claim.state]]||claim.state)}</span>`).join('');
+  const stateLegend=`<details class="epistemic-legend"><summary>${esc(t.claimLegendTitle)}</summary><p>${esc(t.claimLegendHint)}</p><div class="epistemic-chips">${Object.entries(claimKeys).map(([state,key])=>`<span class="epistemic-chip" data-state="${state}">${esc(t[key])}</span>`).join('')}</div></details>`;
+  const top=`<div class="dossier-top"><div><h2>${esc(t.revenueLeakagePotential)}</h2><p>${esc(cityName(city))}, ${esc(countryName(city))} · ${esc(regionName(city.regionId))} · ${esc(typeName(record.type))}</p></div><span class="badge">${esc(t.syntheticIntelligence)}</span></div>`;
+  const identity=`<div class="dossier-metadata">${metric(t.opportunityId,`<code>${esc(record.id)}</code>`)}${metric(t.sector,esc(sectorName(record.sector)))}${metric(t.evidence,`<span class="badge red">${esc(t.unverified)}</span>`)}${metric(t.claimStates,`<div class="claim-chips">${claims||esc(t.notAssessed)}</div>`)}${metric(t.confidenceNotAssessed,esc(t.notAssessed))}</div>`;
   const summary=`<div class="dossier-callout">${esc(signal.problem[lang])}</div><p><strong>${esc(t.signalNotProof)}</strong> · ${esc(t.unverified)}</p>`;
   const why=`<p>${esc(signal.why[lang])}</p><p>${esc(signal.whyNow[lang])}</p><p class="formula">${esc(t.generalTrendOnly)}</p>`;
-  const ai=`<p>${esc(t.aiNotConnected)}</p>`;
-  const blueprint=`<ol class="blueprint-list"><li>${esc(t.blueprintDetect)}</li><li>${esc(t.blueprintVerify)}</li><li>${esc(t.blueprintSolve)}</li></ol>`;
+  const ai=`<p>${esc(t.aiNotConnected)}</p><p>${esc(t.hypotheticalRecoveryText)}</p>`;
+  const blueprint=`<ol class="blueprint-list"><li>${esc(t.blueprintDetect)}</li><li>${esc(t.blueprintRecover)}</li><li>${esc(t.blueprintMeasure)}</li></ol>`;
   const assumptions=contract.valueScenario.assumptions;
   const value=`<div class="value-range">${esc(money(contract.valueScenario.low,lang))} – ${esc(money(contract.valueScenario.high,lang))}</div><p class="formula">${esc(t.monthly)} · ${esc(t.scenarioAssumptions)}</p><details class="scenario-assumptions"><summary>${esc(t.scenarioFormula)}</summary><div class="kv-grid compact">${metric(t.hypotheticalLeads,`${assumptions.prospects[0]}–${assumptions.prospects[1]}`)}${metric(t.ticketPerJob,`${money(assumptions.ticket[0],lang)}–${money(assumptions.ticket[1],lang)}`)}${metric(t.assumedRecoverable,`${Math.round(assumptions.recoverableShare[0]*100)}–${Math.round(assumptions.recoverableShare[1]*100)}%`)}<p class="formula">${esc(t.scenarioFormulaText)}</p></div></details>`;
   const dimensionBars=Object.entries(scored.dimensions).map(([key,value])=>`<div><div class="score-bar-head"><span>${esc(t[scoreLabels[key]])}</span><span>${value}/100</span></div><div class="track"><div class="fill" style="width:${value}%"></div></div></div>`).join('');
   const priority=`<div class="dossier-priority"><strong>${scored.score}/100</strong><span class="badge">${esc(priorityText)}</span></div><p class="priority-explanation">${esc(t.priorityExplanation)}</p><div class="score-bars">${dimensionBars}</div>`;
-  const evidence=`<p>${esc(signal.evidence[lang])}</p><div class="dossier-callout"><strong>${esc(t.evidenceQuestion)}</strong><p>${esc(t.evidenceQuestionText)}</p></div>`;
+  const evidence=`<p>${esc(signal.evidence[lang])}</p><div class="dossier-callout"><strong>${esc(t.evidenceQuestion)}</strong><p>${esc(t.evidenceQuestionText)}</p></div>${stateLegend}`;
   const provenance=`<div class="dossier-metadata">${metric(t.sourceLabel,esc(t.syntheticSource))}${metric(t.coverage,esc(t.coverageGlobal))}${metric(t.freshness,esc(t.noObservedTime))}${metric(t.reliability,esc(t.notAssessed))}</div>`;
   const action=`<p>${esc(signal.action[lang])}</p><p class="formula">${esc(t.reviewAgainstAuthorizedEvidence)}</p><p class="no-send-note">${esc(t.requiresHumanApproval)}</p>`;
-  root.innerHTML=`<div class="dossier-record">${top}${section(t.dossierIdentity,identity)}${section(t.problem,summary)}${section(t.whyNow,why)}${section(t.aiLeverage,ai)}${section(t.businessBlueprint,blueprint)}${section(t.estimatedValue,value)}${section(t.priorityScore,priority)}${section(t.evidence,evidence)}${section(t.sourceProvenance,provenance)}${section(t.recommendedAction,action)}</div>`;
+  root.innerHTML=`<div class="dossier-record">${top}${section(t.dossierSignalLocation,identity)}${section(t.problem,summary)}${section(t.whyNow,why)}${section(t.hypotheticalRecoveryWorkflow,ai)}${section(t.businessBlueprint,blueprint)}${section(t.estimatedValue,value)}${section(t.priorityScore,priority)}${section(t.evidence,evidence)}${section(t.sourceProvenance,provenance)}${section(t.recommendedAction,action)}</div>`;
   $('selectedPreviewText').textContent=`${cityName(city)} · ${typeName(record.type)} · ${scored.score}/100 · ${t.unverified}`;
   document.querySelectorAll('.evidence-check').forEach((input,index)=>{input.checked=checks.has(index);});
   updateCheckProgress();
@@ -165,11 +172,13 @@ function renderAll(){
   if(!filtered.some(record=>record.id===selectedId))selectedId=filtered[0]?.id||null;
   renderSummary();renderList();renderDossier();renderPipeline();renderHistory();
   mapController?.render(filtered,selectedId);
+  globeController?.render(filtered,selectedId);
 }
 function selectRecord(id,origin='list'){
   const record=demoRecords.find(item=>item.id===id);if(!record)return;
   selectedId=id;workflow.addEvent(id,'opened');addHistory('auditOpened',record.id);renderAll();
   if(origin!=='map')mapController?.focusRecord(record);
+  globeController?.focusRecord(record);
   if(window.matchMedia('(max-width: 820px)').matches)toggleDossier(true);
 }
 function viewContext(){
@@ -179,6 +188,7 @@ function viewContext(){
 function setMapView(view){
   mapView=view;document.querySelectorAll('[data-view]').forEach(button=>button.classList.toggle('active',button.dataset.view===view));
   mapController?.setView(view,viewContext());
+  globeController?.setView(view,viewContext());
 }
 function handleCountrySelect(code,name=''){
   const matching=cities.find(city=>city.countryCode===code);
@@ -193,6 +203,11 @@ function toggleDrawer(open){
   const drawer=$('filterDrawer'),button=$('filtersToggle');drawer.classList.toggle('open',open);drawer.setAttribute('aria-hidden',String(!open));drawer.inert=!open;button.setAttribute('aria-expanded',String(open));$('filterBackdrop').hidden=!open;
   if(open)setTimeout(()=>$('searchFilter').focus(),40);else button.focus({preventScroll:true});
 }
+function syncFilterDrawerLayout(){
+  const drawer=$('filterDrawer'),button=$('filtersToggle'),backdrop=$('filterBackdrop'),mobile=window.matchMedia('(max-width: 900px)').matches;
+  if(!mobile){drawer.classList.remove('open');drawer.setAttribute('aria-hidden','false');drawer.inert=false;button.setAttribute('aria-expanded','false');backdrop.hidden=true;return;}
+  const open=drawer.classList.contains('open');drawer.setAttribute('aria-hidden',String(!open));drawer.inert=!open;button.setAttribute('aria-expanded',String(open));backdrop.hidden=!open;
+}
 function toggleDossier(open){
   const panel=$('dossier'),button=$('openDossier'),mobile=window.matchMedia('(max-width: 820px)').matches;
   mobileDossierOpen=mobile&&open;panel.classList.toggle('mobile-open',mobileDossierOpen);panel.setAttribute('aria-hidden',String(mobile&&!mobileDossierOpen));panel.inert=mobile&&!mobileDossierOpen;
@@ -200,12 +215,13 @@ function toggleDossier(open){
   if(mobileDossierOpen)panel.querySelector('.dossier-close')?.focus({preventScroll:true});else if(mobile)button.focus({preventScroll:true});
 }
 function syncDossierLayout(){
+  syncFilterDrawerLayout();
   const mobile=window.matchMedia('(max-width: 820px)').matches,panel=$('dossier'),close=$('closeDossier');
   if(mobile){if(close.parentElement!==panel.querySelector('.dossier-heading'))panel.querySelector('.dossier-heading').append(close);panel.setAttribute('aria-hidden',String(!mobileDossierOpen));panel.inert=!mobileDossierOpen;panel.classList.toggle('mobile-open',mobileDossierOpen);}
   else{if(close.parentElement!==document.querySelector('.map-foot'))document.querySelector('.map-foot').append(close);panel.classList.remove('mobile-open');panel.setAttribute('aria-hidden','false');panel.inert=false;mobileDossierOpen=false;}
   $('openDossier').hidden=!mobile;
   if(mobile)$('openDossier').querySelector('.preview-label').textContent=mobileDossierOpen?t.closeDossier:t.openDossier;
-  requestAnimationFrame(()=>{mapController?.invalidateSize();if(mapView==='world')mapController?.setView('world');});
+  requestAnimationFrame(()=>{mapController?.invalidateSize();if(mapView==='world')mapController?.setView('world');globeController?.resize();});
 }
 function updateCheckProgress(){
   const count=document.querySelectorAll('.evidence-check:checked').length;
@@ -272,10 +288,34 @@ function toggleTiles(){
 function toggleFullscreen(force){
   const shell=$('map').closest('.map-shell'),enabled=typeof force==='boolean'?force:!shell.classList.contains('fullscreen');
   mapController?.setFullscreen(enabled);$('fullscreenMap').textContent=enabled?t.exitFullscreen:t.fullscreen;$('fullscreenMap').setAttribute('aria-pressed',String(enabled));
+  requestAnimationFrame(()=>globeController?.resize());
   if(enabled)document.body.classList.add('map-is-fullscreen');else document.body.classList.remove('map-is-fullscreen');
+}
+function setGlobeStatus(code=globeStatusCode){
+  globeStatusCode=code;const key={ready:'globeStatusReady',noWebgl:'globeStatusNoWebgl',slow:'globeStatusSlow',degraded:'globeStatusReduced'}[code]||'globeStatusReady';
+  if($('globeStatus'))$('globeStatus').textContent=t[key];
+}
+function updateGlobeRotationButton(enabled=globeController?.autoRotate){
+  const button=$('globePause');if(!button)return;const rotating=Boolean(enabled);button.textContent=rotating?t.globePause:t.globeResume;button.setAttribute('aria-pressed',String(!rotating));
+}
+function setVisualMode(mode,statusCode=null){
+  if(mode==='globe'&&!globeController){mode='map';statusCode=statusCode||'noWebgl';}
+  visualMode=mode;const shell=$('mapShell');shell.dataset.visual=mode;
+  $('map').setAttribute('aria-hidden',String(mode!=='map'));$('globeStage').setAttribute('aria-hidden',String(mode!=='globe'));
+  document.querySelectorAll('[data-visual-mode]').forEach(button=>{const active=button.dataset.visualMode===mode;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
+  $('tilesToggle').disabled=mode!=='map';
+  if(mode==='globe'){
+    globeController?.render(filtered,selectedId);globeController?.setView(mapView,viewContext());globeController?.setActive(true);requestAnimationFrame(()=>globeController?.resize());
+  }else{
+    globeController?.setActive(false);requestAnimationFrame(()=>{mapController?.invalidateSize();mapController?.setView(mapView,viewContext());});
+  }
+  setGlobeStatus(statusCode||globeStatusCode);
 }
 function bindActions(){
   document.querySelectorAll('[data-view]').forEach(button=>button.addEventListener('click',()=>setMapView(button.dataset.view)));
+  document.querySelectorAll('[data-visual-mode]').forEach(button=>button.addEventListener('click',()=>setVisualMode(button.dataset.visualMode)));
+  $('globePause').addEventListener('click',()=>updateGlobeRotationButton(globeController?.setRotation(!globeController.autoRotate)));
+  $('globeZoomIn').addEventListener('click',()=>globeController?.zoomBy(-.25));$('globeZoomOut').addEventListener('click',()=>globeController?.zoomBy(.25));
   $('resetMap').addEventListener('click',()=>{setMapView('world');showToast(t.resetMap);});
   $('fullscreenMap').addEventListener('click',()=>toggleFullscreen());
   $('tilesToggle').addEventListener('click',toggleTiles);
@@ -294,7 +334,7 @@ function bindActions(){
   $('navToggle').addEventListener('click',()=>{const open=$('navToggle').getAttribute('aria-expanded')!=='true';$('navToggle').setAttribute('aria-expanded',String(open));$('mainNav').classList.toggle('open',open);});
   document.querySelectorAll('#mainNav a').forEach(link=>link.addEventListener('click',()=>{$('mainNav').classList.remove('open');$('navToggle').setAttribute('aria-expanded','false');}));
   $('languageSelect').value=lang;$('languageSelect').addEventListener('change',()=>{
-    lang=$('languageSelect').value;t=applyLanguage(lang);initFilters();renderAll();mapController?.updateLabels(mapLabels());$('tilesToggle').textContent=$('tilesToggle').getAttribute('aria-pressed')==='true'?t.tilesOn:t.tilesOff;$('tilePrivacyHint').textContent=$('tilesToggle').getAttribute('aria-pressed')==='true'?t.tilePrivacy:t.tileDefaultNote;$('mapMessage').textContent=$('tilesToggle').getAttribute('aria-pressed')==='true'?t.tilePrivacy:t.mapPrivacyLocal;$('fullscreenMap').textContent=$('map').closest('.map-shell').classList.contains('fullscreen')?t.exitFullscreen:t.fullscreen;$('openDossier').querySelector('.preview-label').textContent=mobileDossierOpen?t.closeDossier:t.openDossier;
+    lang=$('languageSelect').value;t=applyLanguage(lang);initFilters();renderAll();mapController?.updateLabels(mapLabels());globeController?.updateLabels(mapLabels());setGlobeStatus(globeStatusCode);updateGlobeRotationButton();$('tilesToggle').textContent=$('tilesToggle').getAttribute('aria-pressed')==='true'?t.tilesOn:t.tilesOff;$('tilePrivacyHint').textContent=$('tilesToggle').getAttribute('aria-pressed')==='true'?t.tilePrivacy:t.tileDefaultNote;$('mapMessage').textContent=$('tilesToggle').getAttribute('aria-pressed')==='true'?t.tilePrivacy:t.mapPrivacyLocal;$('fullscreenMap').textContent=$('map').closest('.map-shell').classList.contains('fullscreen')?t.exitFullscreen:t.fullscreen;$('openDossier').querySelector('.preview-label').textContent=mobileDossierOpen?t.closeDossier:t.openDossier;
   });
   window.addEventListener('resize',syncDossierLayout,{passive:true});
   document.addEventListener('keydown',event=>{
@@ -312,5 +352,9 @@ async function initialize(){
     mapController=await new OpportunityMap({containerId:'map',records:demoRecords,selectedId,onSelect:selectRecord,onCountrySelect:handleCountrySelect,onTileError:()=>showToast(t.mapError),labels:mapLabels()}).mount();
   }catch(error){$('mapMessage').textContent=t.mapError;$('mapStatusText').textContent=t.mapError;$('mapStatusText').classList.add('error');console.error('Eagle Eye local map:',error);}
   renderAll();
+  try{
+    globeController=await new WorldGlobe({containerId:'globeCanvasHost',records:filtered,selectedId,onSelect:selectRecord,onFallback:reason=>setVisualMode('map',reason==='performance'?'slow':'noWebgl'),onStatus:setGlobeStatus,onRotationChange:updateGlobeRotationButton,labels:mapLabels()}).mount();
+    $('globeModeButton').disabled=false;$('globePause').disabled=false;$('globeZoomIn').disabled=false;$('globeZoomOut').disabled=false;updateGlobeRotationButton(globeController.autoRotate);setVisualMode('globe');renderAll();
+  }catch(error){$('globeModeButton').disabled=true;$('globePause').disabled=true;$('globeZoomIn').disabled=true;$('globeZoomOut').disabled=true;setVisualMode('map','noWebgl');console.info('Eagle Eye 3D view unavailable; the local 2D map remains active.',error);}
 }
 initialize();

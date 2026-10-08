@@ -24,3 +24,15 @@
 - Local Chromium/Playwright: 7 viewport widths without horizontal overflow; six languages, Arabic RTL, map scopes/selection/fullscreen, local verification/workflow/draft, reduced motion, and no default external requests. Optional OSM tile request was intercepted before network egress; no page exceptions or non-test console errors.
 - Published as code commit `5e1ba8afd50a609bf80886b03549f4ec16219b97`; Pages workflow run `37724305759` succeeded. Public entry point/assets matched the committed files; the rendered map, 12 markers and mobile Arabic RTL behavior were verified after initialization.
 - No real-data connector, business contact, external message, payment or automated action was added.
+
+
+## 2026-10-08 — Phase 5: 3D World Radar + Cybernetic HUD
+- Preserved the existing static GitHub Pages app, ES modules, Leaflet map adapter, local-only workflow, and all six locales; added no backend or framework rebuild.
+- Added a locally vendored Three.js r186 globe and MIT notice. The globe builds its land texture from bundled Natural Earth GeoJSON, displays seven-region synthetic anchors, graticule/radar rings and a color-coded marker palette, and supports pointer/touch rotation, marker selection, zoom, keyboard controls, and pause/resume.
+- Kept Leaflet as a selectable 2D Tactical Map and automatic fallback for unavailable WebGL2, context loss, or sustained low rendering performance.
+- Added a six-stage numbered lifecycle HUD and a dossier Business Blueprint with hypothetical problem, disconnected-AI disclosure, and three action steps; nothing is verified or executed.
+- Extended the synthetic fixture set to 13 city anchors across seven regions, including a fictional Dubai/Middle East anchor. Updated the opportunity data contract to v3 with claim-level epistemic states and empty evidence references.
+- Updated Phase 5 terminology and coverage summary in all six languages; retained Arabic RTL. Added a map-first mobile layout with an approximately 68svh globe stage, synchronized drawer accessibility state, and no horizontal overflow in the tested viewports.
+- Local Chromium/Playwright verification covered seven widths, six languages, marker-to-dossier interaction, mode switching, fallback paths, local review/draft boundaries, no external default requests, and zero console/page errors. A headless 360×640 SwiftShader sample recorded 264 animation callbacks over 4 seconds; this is not a physical-device FPS guarantee.
+- GitHub Pages publication and live verification for this release are pending and will be recorded in `PROJECT_STATUS.md` after completion.
+- Touch validation at 390×844 confirmed single-finger rotation and two-finger pinch zoom; the six HUD accents are Electric Cyan `#00f0ff`, Emerald `#10b981`, Purple `#a855f7`, Gold `#eab308`, Royal Blue `#3b82f6`, and Shield Cyan `#06b6d4`.

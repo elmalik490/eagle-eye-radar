@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#09121a">
-  <meta name="description" content="Eagle Eye World Radar — a synthetic, human-reviewed opportunity discovery prototype. No live business data is connected.">
-  <title>Eagle Eye · World Radar</title>
+  <meta name="description" content="Eagle Eye Revenue Recovery Radar — static synthetic concept only. No live business data, AI analysis, or recovery is connected.">
+  <title>Eagle Eye · Revenue Recovery Radar</title>
   <link rel="icon" href="data:,">
   <link rel="stylesheet" href="css/app.css">
 </head>
@@ -60,27 +60,50 @@
     <main id="radar" class="main">
       <section id="map-section" class="radar-hero" aria-labelledby="radarTitle">
         <div class="intro">
-          <div><div class="eyebrow-row"><span class="badge blue" data-i18n="realGeography">REAL GEOGRAPHY</span><span class="badge" data-i18n="syntheticSignals">SYNTHETIC SIGNALS</span><span class="badge red" data-i18n="unverified">UNVERIFIED</span></div><h1 id="radarTitle" data-i18n="radarTitle">World Radar</h1><p data-i18n="radarSub">Explore fictional patterns across the world · no live business intelligence</p></div>
+          <div><div class="eyebrow-row"><span class="badge blue" data-i18n="realGeography">REAL GEOGRAPHY</span><span class="badge" data-i18n="syntheticIntelligence">DEMO / SYNTHETIC INTELLIGENCE</span><span class="badge red" data-i18n="unverified">UNVERIFIED</span></div><h1 id="radarTitle" data-i18n="radarTitle">World Radar</h1><p data-i18n="radarSub">Explore fictional patterns across the world · no live business intelligence</p></div>
           <div class="intro-right"><button id="filtersToggle" class="button secondary filter-open" type="button" aria-expanded="false" aria-controls="filterDrawer" data-i18n="filterOpen">Filters</button><button id="refreshScenario" class="button primary" type="button" data-i18n="scan">Run demo scan</button><button id="exploreExample" class="button" type="button" data-i18n="exploreExample">Explore another example</button></div>
         </div>
         <div class="trust-strip"><span class="trust-indicator"><i class="dot" aria-hidden="true"></i><span data-i18n="mapStatusLocal">LOCAL MAP READY</span></span><span class="trust-divider" aria-hidden="true"></span><span data-i18n="demoSnapshot">FIXED DEMO SET · NO LIVE TIME WINDOW</span><span class="trust-divider" aria-hidden="true"></span><span><strong>0</strong> <span data-i18n="connectorsNotConnected">REAL DATA SOURCES</span></span></div>
         <div id="scanStatus" class="scan-status" role="status" aria-live="polite" hidden><span id="scanStatusText"></span><progress id="scanProgress" max="100" value="0"></progress></div>
-        <p class="scan-boundary" data-i18n="scanBoundary">This short animation only steps through local synthetic examples. It does not query live data.</p>
+	        <p class="scan-boundary" data-i18n="scanBoundary">This short animation only steps through local synthetic examples. It does not query live data.</p>
 
-        <div class="radar-grid">
-          <section class="map-panel panel" aria-labelledby="mapTitle">
-            <div class="map-head"><div><h2 id="mapTitle" data-i18n="mapTitle">World Radar</h2><p data-i18n="mapSub">Real world geography · synthetic city-level examples</p></div><span id="mapCount" class="map-count">12 · DEMO</span></div>
-            <div class="map-shell">
-              <div id="map" role="region" tabindex="0" aria-label="World map with synthetic city examples" data-i18n-aria="mapAria"></div>
-              <div class="map-controls" aria-label="Map controls" data-i18n-aria="mapControlsLabel">
-                <div class="segmented" role="group" aria-label="Map view" data-i18n-aria="mapView"><button type="button" data-view="world" class="active" data-i18n="viewWorld">World</button><button type="button" data-view="region" data-i18n="viewRegion">Region</button><button type="button" data-view="country" data-i18n="viewCountry">Country</button><button type="button" data-view="city" data-i18n="viewCity">City</button></div>
-                <div class="map-button-row"><button id="resetMap" class="button tiny" type="button" data-i18n="resetMap">Reset view</button><button id="fullscreenMap" class="button tiny" type="button" data-i18n="fullscreen">Full screen map</button><button id="tilesToggle" class="button tiny" type="button" aria-pressed="false" data-i18n="tilesOff">Street tiles off</button></div>
-              <span id="tilePrivacyHint" class="tile-optin-note" data-i18n="tileDefaultNote">Off by default · On click, fetches visible OSM tiles only. No Eagle Eye records are sent.</span>
+	        <div class="radar-grid">
+	          <section class="map-panel panel" aria-labelledby="mapTitle">
+            <div class="map-head"><div><h2 id="mapTitle" data-i18n="mapTitle">World Radar</h2><p data-i18n="mapSub">Real world geography · synthetic city-level examples</p></div><span id="mapCount" class="map-count">13 · DEMO</span></div>
+	            <div class="lifecycle-hud" role="group" aria-label="Recovery lifecycle · illustrative only" data-i18n-aria="lifecycleAria">
+              <div class="lifecycle-heading"><span data-i18n="lifecycleTitle">RECOVERY LIFECYCLE · ILLUSTRATIVE ONLY</span><span class="badge" data-i18n="syntheticIntelligence">DEMO / SYNTHETIC INTELLIGENCE</span></div>
+	              <ol class="lifecycle-steps">
+	                <li data-step="signal" data-state="demo"><b>01</b><span data-i18n="lifeSignal">SIGNAL</span><small data-i18n="lifeDemo">DEMO</small></li>
+	                <li data-step="verify" data-state="unverified"><b>02</b><span data-i18n="lifeVerify">VERIFY</span><small data-i18n="unverified">UNVERIFIED</small></li>
+	                <li data-step="analyze" data-state="hypothesis"><b>03</b><span data-i18n="lifeAnalyze">ANALYZE</span><small data-i18n="lifeHypothesis">HYPOTHESIS</small></li>
+	                <li data-step="rank" data-state="demo"><b>04</b><span data-i18n="lifeRank">RANK</span><small data-i18n="lifeDemo">DEMO</small></li>
+	                <li data-step="decide" data-state="pending"><b>05</b><span data-i18n="lifeDecide">DECIDE</span><small data-i18n="lifePending">PENDING</small></li>
+	                <li data-step="execute" data-state="disabled" aria-disabled="true"><b>06</b><span data-i18n="lifeExecute">EXECUTE</span><small data-i18n="lifeDisabled">DISABLED</small></li>
+	              </ol>
+	            </div>
+	            <div class="map-shell" id="mapShell" data-visual="map">
+	              <div id="globeStage" class="globe-stage" role="group" aria-label="Interactive 3D globe with synthetic city markers" data-i18n-aria="globeAria" aria-hidden="true">
+	                <div id="globeCanvasHost" class="globe-canvas-host"></div>
+                <span class="globe-demo-tag" data-i18n="syntheticIntelligence">DEMO / SYNTHETIC INTELLIGENCE</span>
+	                <p id="globeInstructions" class="globe-instructions" data-i18n="globeInstructions">Drag to rotate · wheel or pinch to zoom · select a marker to open its synthetic dossier.</p>
+	                <span id="globeStatus" class="globe-status" role="status" aria-live="polite" data-i18n="globeStatusReady">Local 3D globe · synthetic markers</span>
+	                <div class="globe-quick-controls" role="group" aria-label="Globe controls" data-i18n-aria="globeControlsAria">
+	                  <button id="globePause" class="button tiny" type="button" aria-pressed="false" data-i18n="globePause">Pause rotation</button>
+	                  <button id="globeZoomOut" class="globe-zoom" type="button" aria-label="Zoom out" data-i18n-aria="globeZoomOut">−</button>
+	                  <button id="globeZoomIn" class="globe-zoom" type="button" aria-label="Zoom in" data-i18n-aria="globeZoomIn">+</button>
+	                </div>
+	              </div>
+	              <div id="map" role="region" tabindex="0" aria-label="World map with synthetic city examples" data-i18n-aria="mapAria" aria-hidden="false"></div>
+	              <div class="map-controls" aria-label="Map controls" data-i18n-aria="mapControlsLabel">
+	                <div class="segmented visual-mode" role="group" aria-label="Visualization mode" data-i18n-aria="visualModeAria"><button id="globeModeButton" type="button" data-visual-mode="globe" data-i18n="globeView">3D Globe</button><button id="mapModeButton" type="button" data-visual-mode="map" class="active" data-i18n="map2dView">2D Map</button></div>
+	                <div class="segmented" role="group" aria-label="Map view" data-i18n-aria="mapView"><button type="button" data-view="world" class="active" data-i18n="viewWorld">World</button><button type="button" data-view="region" data-i18n="viewRegion">Region</button><button type="button" data-view="country" data-i18n="viewCountry">Country</button><button type="button" data-view="city" data-i18n="viewCity">City</button></div>
+	                <div class="map-button-row"><button id="resetMap" class="button tiny" type="button" data-i18n="resetMap">Reset view</button><button id="fullscreenMap" class="button tiny" type="button" data-i18n="fullscreen">Full screen map</button><button id="tilesToggle" class="button tiny" type="button" aria-pressed="false" data-i18n="tilesOff">Street tiles off</button></div>
+	              <span id="tilePrivacyHint" class="tile-optin-note" data-i18n="tileDefaultNote">Off by default · On click, fetches visible OSM tiles only. No Eagle Eye records are sent.</span>
               </div>
               <div class="map-legend" aria-label="Map legend" data-i18n-aria="mapLegendAria"><span class="legend-item"><i class="legend-dot" aria-hidden="true"></i><span data-i18n="markerNotice">Synthetic city anchor · not a business location</span></span><span class="legend-item"><i class="legend-priority" aria-hidden="true"></i><span data-i18n="legendPriority">Outline · demo priority only</span></span><span class="legend-item"><i class="legend-selected" aria-hidden="true"></i><span data-i18n="legendSelected">Bright ring · selected example</span></span></div>
               <button id="openDossier" class="selected-preview" type="button" aria-expanded="false" aria-controls="dossier"><span class="preview-label" data-i18n="openDossier">Open dossier</span><span id="selectedPreviewText"></span><span class="preview-arrow" aria-hidden="true">↑</span></button>
-            </div>
-            <div class="map-foot"><span id="mapMessage" data-i18n="mapPrivacyLocal">The country outlines and demo markers load from this site. No external request is made unless you choose detailed street tiles.</span><button id="closeDossier" class="icon-button dossier-close" type="button" data-i18n="closeDossier">Close dossier</button></div>
+	            </div>
+	            <div class="map-foot"><span id="mapMessage" data-i18n="mapPrivacyLocal">The country outlines and demo markers load from this site. No external request is made unless you choose detailed street tiles.</span><button id="closeDossier" class="icon-button dossier-close" type="button" data-i18n="closeDossier">Close dossier</button></div>
             <p id="tileNotice" class="tile-notice" data-i18n="tilePrivacy">Loading optional OpenStreetMap tiles contacts its public servers and reveals the visible area only. No Eagle Eye records are sent.</p>
           </section>
 
@@ -98,10 +121,10 @@
             <div class="audit-panel"><h3 data-i18n="activityTimeline">LOCAL AUDIT TIMELINE</h3><ol id="workflowTimeline" class="audit-timeline"></ol></div>
           </aside>
         </div>
-        <div id="summaryStrip" class="summary-strip" aria-label="Demo coverage summary"><div><strong id="kpiCount">12</strong><span data-i18n="demoOpportunities">Demo opportunities</span></div><div><strong id="kpiRegions">6</strong><span data-i18n="regionsCovered">Regions represented</span></div><div><strong id="kpiHigh">0</strong><span data-i18n="highPriority">High priority</span></div><div><strong id="kpiVerified">0</strong><span data-i18n="connectorsNotConnected">REAL DATA SOURCES</span></div></div>
+        <div id="summaryStrip" class="summary-strip" aria-label="Demo coverage summary"><div><strong id="kpiCount">13</strong><span data-i18n="demoOpportunities">Demo opportunities</span></div><div><strong id="kpiRegions">7</strong><span data-i18n="regionsCovered">Regions represented</span></div><div><strong id="kpiHigh">0</strong><span data-i18n="highPriority">High priority</span></div><div><strong id="kpiVerified">0</strong><span data-i18n="connectorsNotConnected">REAL DATA SOURCES</span></div></div>
       </section>
 
-      <section id="opportunities" class="panel list-panel" aria-labelledby="listTitle"><div class="section-head"><div><h2 id="listTitle" data-i18n="results">Synthetic examples</h2><p><span id="resultCount">12</span> <span data-i18n="resultCount">examples</span> · <span data-i18n="demo">DEMO / SYNTHETIC</span></p></div></div><div id="opportunityList" class="opp-list" role="list"></div></section>
+      <section id="opportunities" class="panel list-panel" aria-labelledby="listTitle"><div class="section-head"><div><h2 id="listTitle" data-i18n="results">Synthetic examples</h2><p><span id="resultCount">13</span> <span data-i18n="resultCount">examples</span> · <span data-i18n="demo">DEMO / SYNTHETIC</span></p></div></div><div id="opportunityList" class="opp-list" role="list"></div></section>
       <section id="leakage-center" class="panel leakage-panel" aria-labelledby="leakageTitle"><div class="section-head"><div><h2 id="leakageTitle" data-i18n="leakageCenter">Revenue leakage · demo taxonomy</h2><p data-i18n="leakageCatalogHint">Generic taxonomy only · no real detections</p></div></div><div id="leakageCatalog" class="leakage-grid"></div></section>
 
       <details id="workflow" class="panel secondary-panel"><summary><span data-i18n="pipelineTitle">Local demo workflow</span><span class="badge" data-i18n="workflowLocal">DEMO WORKFLOW · THIS SESSION ONLY</span></summary><div class="section-head"><div><h2 data-i18n="pipelineTitle">Local demo workflow</h2><p data-i18n="pipelineHint">Stage is workflow state only; it never verifies evidence or enables action.</p></div></div><ol id="pipelineTrack" class="pipeline-track" aria-label="Synthetic opportunity workflow"></ol><div class="flow-chain" aria-label="Evidence-first workflow"><span data-i18n="signal">SIGNAL</span><i aria-hidden="true">→</i><span data-i18n="evidence">EVIDENCE</span><i aria-hidden="true">→</i><span data-i18n="interpretation">INTERPRETATION</span><i aria-hidden="true">→</i><span data-i18n="scenarioValue">VALUE SCENARIO</span><i aria-hidden="true">→</i><span data-i18n="recommendedAction">RECOMMENDATION</span></div></details>

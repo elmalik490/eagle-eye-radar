@@ -1,37 +1,38 @@
 # Eagle Eye — World Opportunity Radar
 
-Eagle Eye is an evolving **static opportunity-intelligence prototype**. Phase 4.2 continues the existing single-page v0.1 project; it is not a rebuild or a production revenue-recovery service. Its opportunity layer contains only fictional, locally authored scenarios. It does **not** discover businesses, detect actual leakage, verify a loss, or recover revenue.
+Eagle Eye is an evolving **static opportunity-intelligence prototype**. Phase 5 upgrades the existing single-page v0.1 project with a locally rendered 3D globe and a cybernetic command HUD; it is not a rebuild or production revenue-recovery service. Every opportunity remains fictional, synthetic and unverified. The app does **not** discover businesses, detect actual leakage, verify a loss, or recover revenue.
 
 ## Live app and repository
 
 - GitHub Pages: <https://elmalik490.github.io/eagle-eye-radar/>
 - Repository: <https://github.com/elmalik490/eagle-eye-radar>
 - Default branch: `main`; Pages publishes the repository root from `.github/workflows/pages.yml`.
-- Phase 4.2 implementation commit: [`5e1ba8afd50a609bf80886b03549f4ec16219b97`](https://github.com/elmalik490/eagle-eye-radar/commit/5e1ba8afd50a609bf80886b03549f4ec16219b97); Pages workflow run [#37724305759](https://github.com/elmalik490/eagle-eye-radar/actions/runs/37724305759) succeeded.
-- Commit-specific live check: <https://elmalik490.github.io/eagle-eye-radar/?v=5e1ba8afd50a609bf80886b03549f4ec16219b97>. The published entry point, CSS, modules, Leaflet assets and world GeoJSON were checked after deployment.
+- Phase 5 publication status and verification details: [`PROJECT_STATUS.md`](PROJECT_STATUS.md).
 
 ## What the prototype does
 
-- Preserves the existing static page and GitHub Pages workflow; no framework/backend rebuild or build step.
-- Shows a local Natural Earth world-boundary map with **12 fictional public-city anchors** across six broad regions. A marker is a city anchor, not a company, lead, or observed event.
-- Supports World, Region, Country and City map views; selection from map/list; a synchronized opportunity dossier; city/country/region, sector, type and heuristic-priority filters; and stable-ID/location/category search.
-- Presents a structured signal dossier with the fictional problem pattern, interpretation, explicitly hypothetical monthly value range and assumptions, unverified evidence status, source limitations, and suggested evidence/review step.
-- Shows deterministic demo priority dimensions separately from verification and evidence quality.
-- Retains a local-only, editable draft and human-approval boundary. Review checklists and workflow-stage changes never verify a record or send an action.
-- Includes six languages: English, French, Arabic (RTL), Russian, Chinese and Korean.
-- Uses a responsive map-first mobile layout, a right-side collapsible filter drawer and a mobile dossier sheet.
+- Preserves the existing static page, ES modules, and GitHub Pages architecture; no framework rewrite, backend, or build step.
+- Shows **13 fictional city anchors** across North America, South America, Europe, the Middle East, Africa, Asia, and Oceania. Markers are synthetic display anchors, not companies, leads, or observed events.
+- Renders a local Three.js 3D globe with glowing Natural Earth land geometry, graticule/radar rings, and color-coded fictional markers. The project vendors Three.js r186 locally; no CDN or external globe API is used.
+- Provides a clear **3D Globe / 2D Tactical Map** switch. Leaflet remains available as the normal 2D view and automatic fallback when WebGL2 is unavailable, the context is lost, or sustained low frame rate is detected.
+- Supports World, Region, Country, and City views; pointer/touch rotation, wheel/pinch zoom, marker selection, pause/resume, and reset; selection synchronizes with the local list and dossier.
+- Presents a structured dossier with a hypothetical problem, explicitly disconnected AI concept, three-step Business Blueprint, illustrative assumptions, unverified evidence, and human-review guardrails.
+- Keeps deterministic demo priority separate from evidence, confidence, verification, and workflow state. The v3 opportunity contract records claim-level epistemic states.
+- Retains local-only filters, verification checklist, editable draft, workflow stage, and session history. Nothing is sent or executed.
+- Includes six languages: English, French, Arabic (RTL), Russian, Chinese, and Korean.
+- Uses a mobile-first layout with the globe stage at about 68% of viewport height below 768px, a collapsible filter drawer, and a dossier sheet.
 
 ## DEMO / SYNTHETIC versus real behavior
 
-**Real functionality:** static rendering, browser-side search/filter/selection, local synthetic-example generation, local workflow/draft UI, language preference, and rendering of public geographic boundary data. The boundary data is a locally bundled, simplified Natural Earth derivative; source and terms are recorded in [`data/ATTRIBUTION.md`](data/ATTRIBUTION.md).
+**Real functionality:** static rendering, client-side search/filter/selection, local synthetic-example generation, local draft/review UI, browser-local language preference, rendering of public geographic boundary data, and (only after explicit opt-in) visible OpenStreetMap street tiles.
 
-**DEMO / SYNTHETIC:** all 12 opportunity records, signals, IDs, scores, priority bands, dollar ranges, assumptions, evidence placeholders, recommendations and map markers. The basemap is not evidence for the opportunity layer. There is no connected business, revenue, CRM, call, service, transaction, lead, or other source. No signal or loss is verified.
+**DEMO / SYNTHETIC:** all 13 opportunity records, signals, IDs, scores, priority bands, dollar ranges, assumptions, evidence placeholders, recommendations, marker locations, and workflow examples. The basemap is geographic context only, not evidence for the opportunity layer. There is no connected business, revenue, CRM, call, service, transaction, lead, or other source. No signal or loss is verified.
 
-Priority is a deterministic sorting heuristic over three pre-authored demo dimensions: demand (45%), urgency (30%) and scope (25%). These fixture values are not measured. Evidence quality and confidence remain **not assessed**; priority is not probability, prediction, verified exposure, or expected recovery. The USD monthly value range is an illustrative calculation from visible synthetic assumptions, not observed business performance.
+Priority is a deterministic sorting heuristic over pre-authored demo dimensions: demand (45%), urgency (30%), and scope (25%). Fixture values are not measured. Evidence quality and confidence remain **not assessed**; priority is not probability, prediction, verified exposure, or expected recovery. The USD monthly value range is calculated from visible synthetic assumptions, not observed business performance. The “AI solution” is a disconnected concept label and is not generated by a model.
 
-## Map network behavior
+## Globe and map network behavior
 
-The default map draws local vector boundaries and synthetic city markers without requesting a map service. The optional street-tile switch is off by default. A visible pre-click notice says that enabling it requests only visible OpenStreetMap tiles and sends **no Eagle Eye records**. If enabled, the browser requests tiles from `tile.openstreetmap.org`; attribution is displayed. This public tile service is best-effort and is not a production SLA or commercial-scale entitlement. See [`KNOWN_ISSUES.md`](KNOWN_ISSUES.md).
+The default globe texture is rendered locally from bundled Natural Earth GeoJSON. Three.js, Leaflet, and their required source assets are bundled in `vendor/`. The default view makes no external request. The optional street-tile switch remains off until the user enables it; a pre-click notice says that enabling it requests only visible OpenStreetMap tiles and sends **no Eagle Eye records**. Attribution is displayed. The public tile service is best-effort and is not a production SLA or commercial-scale entitlement. See [`KNOWN_ISSUES.md`](KNOWN_ISSUES.md).
 
 ## Run locally
 
@@ -41,12 +42,16 @@ No build step is required. From the repository root:
 python3 -m http.server 8080
 ```
 
-Open <http://localhost:8080>. Application modules, Leaflet 1.9.4 and world-boundary data are served locally. An optional user action is required before any OpenStreetMap tile request.
+Open <http://localhost:8080>. Application modules, Three.js, Leaflet, and world-boundary data are served locally. WebGL2 is required for the 3D view; the local Leaflet map is the 2D fallback. An optional user action is required before any OpenStreetMap tile request.
 
 ## Main files
 
-`index.html` remains the entry point; `css/app.css` owns responsive, mobile and RTL presentation; `js/app.js` orchestrates filters, dossier and local workflow; `js/demo-data.js` holds the fictional fixtures; `js/scoring.js` calculates illustrative ranges and deterministic demo ranking; `js/opportunity-contract.js` maps fixtures to the versioned v2 contract; `js/demo-workflow.js` owns session-only stages/events; `js/i18n.js` and `js/world-radar-i18n.js` provide six-language strings; `js/map-view.js` adapts Leaflet and synthetic markers; and `data/countries-110m.geojson` contains simplified public geographic boundaries. [`DATA_MODEL.md`](DATA_MODEL.md), [`ARCHITECTURE.md`](ARCHITECTURE.md), [`PHASE42_IMPLEMENTATION_PLAN.md`](PHASE42_IMPLEMENTATION_PLAN.md), and the status/limitations/roadmap/handover documents record design and state.
+`index.html` remains the entry point; `css/app.css` owns responsive, mobile and RTL presentation; `js/app.js` orchestrates filters, dossier and local workflow; `js/demo-data.js` holds fictional fixtures; `js/scoring.js` calculates illustrative ranges and deterministic demo ranking; `js/opportunity-contract.js` maps fixtures to the versioned v3 contract; `js/demo-workflow.js` owns session-only stages/events; `js/i18n.js`, `js/world-radar-i18n.js`, and `js/phase5-i18n.js` provide six-language strings; `js/map-view.js` adapts Leaflet; `js/globe-view.js` renders the local Three.js globe and handles 3D interaction/fallback; `data/countries-110m.geojson` contains simplified public geographic boundaries; and `vendor/three/` and `vendor/leaflet/` contain local libraries with their licenses. [`DATA_MODEL.md`](DATA_MODEL.md), [`ARCHITECTURE.md`](ARCHITECTURE.md), [`PHASE5_IMPLEMENTATION_PLAN.md`](PHASE5_IMPLEMENTATION_PLAN.md), status, limitations, roadmap, and handover documents record the design and state.
 
 ## Explicit boundaries
 
-There is no backend, database, authentication, tenant isolation, real-data connector, durable audit log, enforced approval, CRM, automated execution, external messaging, payment flow or real opportunity discovery. Session workflow state can be lost. “Reviewed,” stage movement, checklist selection and a draft are not formal approvals or business decisions. Do not put prospects, contact details or private validation materials in this public repository.
+There is no backend, database, authentication, tenant isolation, real-data connector, durable audit log, enforced approval, CRM, automated execution, external messaging, payment flow, or real opportunity discovery. Session workflow state can be lost. “Reviewed,” stage movement, checklist selection, and a draft are not formal approvals or business decisions. Do not put prospects, contact details, or private validation materials in this public repository.
+
+## Cybernetic HUD palette
+
+The six named interface accents are Electric Cyan (`#00f0ff`), Emerald (`#10b981`), Purple (`#a855f7`), Gold (`#eab308`), Royal Blue (`#3b82f6`), and Shield Cyan (`#06b6d4`). Lifecycle and trust states also retain text labels; color is not intended to replace the synthetic/unverified wording.

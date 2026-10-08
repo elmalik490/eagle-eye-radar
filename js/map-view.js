@@ -65,7 +65,7 @@ export class OpportunityMap{
     if(view==='region'){
       const requestedId=regionId||cities.find(item=>item.id===cityId)?.regionId||'northAmerica';
       const id=Object.prototype.hasOwnProperty.call(regions,requestedId)?requestedId:'northAmerica';
-      const centers={northAmerica:[43,-100,3],southAmerica:[-22,-58,3],europe:[52,13,4],africa:[2,18,3],asia:[30,100,2.75],oceania:[-25,145,3]};
+      const centers={northAmerica:[43,-100,3],southAmerica:[-22,-58,3],europe:[52,13,4],africa:[2,18,3],middleEast:[25,45,3.5],asia:[30,100,2.75],oceania:[-25,145,3]};
       const [lat,lng,zoom]=centers[id]||[24,5,2.75];
       this.map.setView([lat,lng],zoom,{animate:false});return;
     }

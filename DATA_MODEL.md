@@ -1,12 +1,12 @@
-# Opportunity data contract — v2 (synthetic adapter)
+# Opportunity data contract — v3 (synthetic adapter)
 
-The interface consumes a versioned opportunity shape so a future, explicitly authorized source adapter can be considered without redesigning the dossier. In this release, `toOpportunityContract()` maps only pre-authored local fictional examples. It does **not** connect or imply a real source.
+The interface consumes a versioned opportunity shape so a future, explicitly authorized source adapter can be considered without redesigning the dossier. In this release, `toOpportunityContract()` maps only pre-authored local fictional examples. It does **not** connect to or imply a real source.
 
 ## Shape
 
 ```text
 {
-  schemaVersion: 2,
+  schemaVersion: 3,
   id: string,                           // synthetic fixture id
   identity: {
     location: { cityId, countryCode, regionId, precision: "public_city_anchor" },
@@ -25,11 +25,17 @@ The interface consumes a versioned opportunity shape so a future, explicitly aut
     missing: ["authorized_primary_source", "corroborating_source",
               "defined_scope_and_denominator", "confirmed_outcome"],
     quality: { value: "not_assessed", basis: "synthetic_demo_only" },
-    verificationStatus: "unverified"
+    verificationStatus: "unverified",
+    stateVocabulary: ["FACT", "VERIFIED", "LIKELY", "HYPOTHESIS", "UNVERIFIED", "CONFLICTING"],
+    claims: [
+      { id: "workflow-pattern", subject: "potential_process_gap", state: "HYPOTHESIS", evidenceIds: [] },
+      { id: "business-event", subject: "observed_business_event", state: "UNVERIFIED", evidenceIds: [] },
+      { id: "value-outcome", subject: "recovered_value", state: "HYPOTHESIS", evidenceIds: [] }
+    ]
   },
   interpretation: {
     status: "hypothesis_only", confidence: null,
-    explanation: string
+    explanation: "General pattern context is separate from evidence of any real event."
   },
   valueScenario: {
     currency: "USD", period: "month", low: number, high: number,
@@ -54,10 +60,10 @@ The interface consumes a versioned opportunity shape so a future, explicitly aut
     source: "Local synthetic fixture",
     status: "DEMO / SYNTHETIC / NOT REAL",
     collectionDate: null,
-    coverage: "12 public city anchors across six broad world regions",
+    coverage: "13 fictional city anchors across seven world regions",
     freshness: "no observed time window",
     reliability: "not_assessed",
-    permissionStatus: "locally authored fictional example; no business source accessed",
+    permissionStatus: "locally authored fictional examples; no business source accessed",
     evidenceType: "synthetic scenario"
   },
   risk: {
@@ -77,14 +83,16 @@ The interface consumes a versioned opportunity shape so a future, explicitly aut
 
 ## Semantics and limits
 
-`detectedAt` is `null` because these records were not detected. The city location is a public city anchor only. Signal strength is null/not measured, evidence is empty, and evidence quality, source reliability, confidence and business loss are not assessed. `collectionDate` is null; the dataset is fixed synthetic content, not a source observation window.
+`detectedAt` is `null` because these records were not detected. The city location is a public city anchor only. Signal strength is null/not measured, evidence is empty, and evidence quality, source reliability, confidence, and business loss are not assessed. `collectionDate` is null; the dataset is fixed synthetic content, not a source observation window.
 
-The monthly USD range is calculated locally from hypothetical sector prospect counts, ticket values and recoverable-share assumptions. `geographicAdjustment` is zero; a city name or real map boundary does not increase the amount. The range is not a measurement, quote, forecast or recovered revenue.
+Claim-state vocabulary is descriptive, not an evidence generator. The current fixtures label a potential process pattern and hypothetical value outcome as `HYPOTHESIS`; a claimed real business event is `UNVERIFIED`. Every claim has an empty evidence reference list. These states remain separate from `verificationStatus`, priority, and local workflow stage.
 
-Priority is a deterministic sorting heuristic over pre-authored fixture values: demand 45%, urgency 30%, scope 25%. The dimensions are explicitly labelled demo. The number/band is not a probability, calibrated likelihood, estimate of leakage or confidence. Evidence quality is not included in the score because evidence does not exist.
+The monthly USD range is calculated locally from hypothetical sector prospect counts, ticket values, and recoverable-share assumptions. `geographicAdjustment` is zero; a city name or real map boundary does not increase the amount. The range is not a measurement, quote, forecast, or recovered revenue.
+
+Priority is a deterministic sorting heuristic over pre-authored fixture values: demand 45%, urgency 30%, scope 25%. The dimensions are explicitly demo. The number/band is not a probability, calibrated likelihood, estimate of leakage, or confidence. Evidence quality is not included in the score because evidence does not exist.
 
 Workflow stage is separate from `verificationStatus`. Moving to “Qualified,” “Action Ready,” or “Resolved” changes only local session UI state. It never verifies evidence, records a business decision, or enables an external action. `DemoWorkflow` uses `sessionStorage`; it is not a durable audit log.
 
 The bundled Natural Earth map boundaries are geographic display data, not an opportunity feed. Optional OSM raster tiles are likewise basemap context and are requested only after explicit opt-in. No opportunity or business data is sent to either map source.
 
-Future connectors must not be attached until permission, source provenance/access scope, privacy, retention, correction/removal, tenant isolation, operational security, source quality, calibration, review and approval requirements are independently decided. Keep prospect or private-source records out of this public repository.
+Future connectors must not be attached until permission, source provenance/access scope, privacy, retention, correction/removal, tenant isolation, operational security, source quality, calibration, review, and approval requirements are independently decided. Keep prospect or private-source records out of this public repository.

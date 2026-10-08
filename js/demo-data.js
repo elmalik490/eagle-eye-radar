@@ -4,6 +4,7 @@ export const regions = {
   southAmerica: { names: { en:'South America', fr:'Amérique du Sud', ar:'أمريكا الجنوبية', ru:'Южная Америка', zh:'南美洲', ko:'남아메리카' }, bounds:[[-58,-84],[14,-32]] },
   europe: { names: { en:'Europe', fr:'Europe', ar:'أوروبا', ru:'Европа', zh:'欧洲', ko:'유럽' }, bounds:[[34,-14],[72,42]] },
   africa: { names: { en:'Africa', fr:'Afrique', ar:'أفريقيا', ru:'Африка', zh:'非洲', ko:'아프리카' }, bounds:[[-36,-20],[38,55]] },
+  middleEast: { names: { en:'Middle East', fr:'Moyen-Orient', ar:'الشرق الأوسط', ru:'Ближний Восток', zh:'中东', ko:'중동' }, bounds:[[12,34],[42,65]] },
   asia: { names: { en:'Asia', fr:'Asie', ar:'آسيا', ru:'Азия', zh:'亚洲', ko:'아시아' }, bounds:[[-12,28],[72,180]] },
   oceania: { names: { en:'Oceania', fr:'Océanie', ar:'أوقيانوسيا', ru:'Океания', zh:'大洋洲', ko:'오세아니아' }, bounds:[[-50,110],[2,180]] }
 };
@@ -20,7 +21,8 @@ export const cities = [
   {id:'singapore',countryCode:'SGP',regionId:'asia',lat:1.3521,lng:103.8198,names:{en:'Singapore',fr:'Singapour',ar:'سنغافورة',ru:'Сингапур',zh:'新加坡',ko:'싱가포르'},countries:{en:'Singapore',fr:'Singapour',ar:'سنغافورة',ru:'Сингапур',zh:'新加坡',ko:'싱가포르'}},
   {id:'tokyo',countryCode:'JPN',regionId:'asia',lat:35.6762,lng:139.6503,names:{en:'Tokyo',fr:'Tokyo',ar:'طوكيو',ru:'Токио',zh:'东京',ko:'도쿄'},countries:{en:'Japan',fr:'Japon',ar:'اليابان',ru:'Япония',zh:'日本',ko:'일본'}},
   {id:'sydney',countryCode:'AUS',regionId:'oceania',lat:-33.8688,lng:151.2093,names:{en:'Sydney',fr:'Sydney',ar:'سيدني',ru:'Сидней',zh:'悉尼',ko:'시드니'},countries:{en:'Australia',fr:'Australie',ar:'أستراليا',ru:'Австралия',zh:'澳大利亚',ko:'호주'}},
-  {id:'johannesburg',countryCode:'ZAF',regionId:'africa',lat:-26.2041,lng:28.0473,names:{en:'Johannesburg',fr:'Johannesburg',ar:'جوهانسبرغ',ru:'Йоханнесбург',zh:'约翰内斯堡',ko:'요하네스버그'},countries:{en:'South Africa',fr:'Afrique du Sud',ar:'جنوب أفريقيا',ru:'Южная Африка',zh:'南非',ko:'남아프리카공화국'}}
+  {id:'johannesburg',countryCode:'ZAF',regionId:'africa',lat:-26.2041,lng:28.0473,names:{en:'Johannesburg',fr:'Johannesburg',ar:'جوهانسبرغ',ru:'Йоханнесбург',zh:'约翰内斯堡',ko:'요하네스버그'},countries:{en:'South Africa',fr:'Afrique du Sud',ar:'جنوب أفريقيا',ru:'Южная Африка',zh:'南非',ko:'남아프리카공화국'}},
+  {id:'dubai',countryCode:'ARE',regionId:'middleEast',lat:25.2048,lng:55.2708,names:{en:'Dubai',fr:'Dubaï',ar:'دبي',ru:'Дубай',zh:'迪拜',ko:'두바이'},countries:{en:'United Arab Emirates',fr:'Émirats arabes unis',ar:'الإمارات العربية المتحدة',ru:'ОАЭ',zh:'阿联酋',ko:'아랍에미리트'}}
 ];
 
 export const sectors = {
@@ -71,12 +73,12 @@ export const demoRecords=cities.map((city,index)=>({
   cityId:city.id,
   regionId:city.regionId,
   countryCode:city.countryCode,
-  sector:sectorIds[(index*3+1)%sectorIds.length],
+  sector:index===12?'homeServices':sectorIds[(index*3+1)%sectorIds.length],
   type:Object.keys(opportunityTypes)[index%4],
   // Deterministic fixture inputs used for demo sorting only; not measured signal strength or confidence.
-  demandIndex:[76,58,83,65,72,91,61,79,69,88,54,74][index],
-  urgency:[68,52,75,61,57,84,49,72,63,81,46,66][index],
-  scopeIndex:[64,55,78,59,71,82,53,74,62,86,48,69][index]
+  demandIndex:[76,58,83,65,72,91,61,79,69,88,54,74,71][index],
+  urgency:[68,52,75,61,57,84,49,72,63,81,46,66,62][index],
+  scopeIndex:[64,55,78,59,71,82,53,74,62,86,48,69,67][index]
 }));
 
 export const verificationStatus='unverified';
