@@ -1,25 +1,19 @@
 # Eagle Eye — Handover
 
-**Current state:** improved static prototype in the existing `elmalik490/eagle-eye-radar` repository. This continuation began from commit `dea3bc609f976ab7f153e7e9e9dd47141d0eb325` on `main`; the existing GitHub Pages deployment structure is preserved. The implementation changes are ready for a commit/push and public deployment verification.
+**Current work:** Phase 3 continuation of the existing `elmalik490/eagle-eye-radar` repository. The one-page GitHub Pages design and deployment workflow are retained. The Phase 3 local implementation has passed the recorded browser checks but is pending final commit/push and exact Pages deployment verification. The public site remains on the previous deployed baseline until that completes.
 
-## What is present
+## Project shape
 
-`index.html` remains the entry point. The application is split across `css/app.css`, `js/app.js`, `js/demo-data.js`, `js/scoring.js`, `js/i18n.js`, and `js/map-view.js`; Leaflet 1.9.4 is locally included under `vendor/leaflet/` with its license. `.github/workflows/pages.yml` continues to deploy the repository root. See [ARCHITECTURE.md](ARCHITECTURE.md) for module responsibility and [README.md](README.md) for operation.
+`index.html` remains the entry point. UI/styles live in `css/app.css`; client orchestration in `js/app.js`; fixture records in `js/demo-data.js`; score arithmetic in `js/scoring.js`; localization in `js/i18n.js`; map behavior in `js/map-view.js`; normalized demo adapter in `js/opportunity-contract.js`; and session-only stages/history in `js/demo-workflow.js`. Leaflet 1.9.4 stays bundled in `vendor/leaflet/`. The static root is deployed through `.github/workflows/pages.yml`; there is no build or backend. See [`DATA_MODEL.md`](DATA_MODEL.md) and [`ARCHITECTURE.md`](ARCHITECTURE.md).
 
-The interface includes responsive search/filters, six languages with Arabic RTL, synthetic opportunity cards and scoring explanations, opt-in map loading and OSM attribution, a checklist that stays unverified, and an editable local-only internal note. None of the fixtures describe real businesses or observed revenue loss. Map circles and city anchors are synthetic overlays, not business location data.
+The dossier separates opportunity identity, signal, interpretation, scenario value, evidence, source provenance, priority, freshness, verification, risks and recommendation. All nine records remain `DEMO / SYNTHETIC`; evidence is empty and quality is not assessed; every item stays `UNVERIFIED`. Priority is a deterministic demonstration heuristic and illustrative value range, not a calibrated business conclusion. Map anchors are city-level synthetic placements. OSM is an optional real basemap only, not intelligence evidence.
 
-## Local verification completed
+## Verified local test scope
 
-Chromium/Playwright reported no horizontal overflow at 360, 390, 430, 768, 1024, 1280, and 1440 pixels and no JavaScript page exceptions in the measured flows. All six UI translation dictionaries contained all rendered interface keys. Filtering to Miami/Roofing returned one scenario. Arabic RTL and the Arabic draft were checked. No OSM tile request occurred before the person selected the visible map-load action; afterwards all three city-centroid markers rendered, marker selection updated the dossier, the World control and overlays worked, and the mapped test requested eight visible tiles. Checklist interaction did not change `UNVERIFIED`. There is no committed browser-test suite yet.
+Chromium/Playwright passed at widths 360, 390, 430, 768, 1024, 1280 and 1440 px, with no horizontal document/body overflow. Six UI dictionaries have the same keys; Arabic RTL and five LTR locales render. Search by ID, taxonomy filtering, selected dossier, evidence checklist remaining unverified, local workflow advance/reset, event timeline, editable draft, readiness status, map view controls/overlays, Miami marker-to-dossier sync, reset, full-screen and Escape were exercised. No JavaScript page exceptions or console errors were observed. OSM requests were intercepted and locally fulfilled during this phase's map test, so the test had no external network egress. This is not a formal accessibility, security, performance or cross-browser audit; the test script was kept under `/tmp` and is not a committed CI suite.
 
-## Deployment next step
+## Next step and boundaries
 
-1. Review and commit the current working tree to `main`.
-2. Push the authorized repository update; GitHub Actions will run the existing Pages workflow.
-3. Confirm that the run succeeded for the exact commit and that the live URL serves the new HTML, JavaScript, CSS and vendor assets. Until that live check succeeds, describe the local build as tested but do not claim the public deployment has been verified.
+Finish final diff/build checks, commit only the project files, push the explicitly authorized repository, then verify the exact GitHub Actions deployment and public Page before describing Phase 3 as live. Do not infer deployment success from a successful push alone.
 
-No migration or build step is needed. Run `python3 -m http.server 8080` in the repository to preview locally. Use the map-load control to test optional OSM tiles.
-
-## Safety and privacy boundaries
-
-The app has no backend, real-data connector, business discovery, verified evidence, durable approval, CRM, external send capability, billing or payment. No prospect was contacted and no external irreversible action was taken. The private commercial-validation materials remain outside this public repository; do not add prospect identities, contact details, private research or private spreadsheet contents here. Any future outreach or consequential external action needs its own explicit authorization and an approved private workflow.
+Do not attach real-data connectors or source access without a separate decision on permission and privacy. No prospects, contact details, private research, messages, payments, CRM actions or irreversible external operations are in scope. Workflow movement, “reviewed,” checklist selections and draft text are not formal approvals. Keep private commercial validation outside this public repository.
