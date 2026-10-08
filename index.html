@@ -29,8 +29,23 @@
   </header>
 
   <div id="filterBackdrop" class="drawer-backdrop" hidden></div>
+  <div id="hudDrawerBackdrop" class="hud-backdrop" hidden></div>
+  <aside id="hudDrawer" class="hud-drawer" aria-labelledby="hudDrawerTitle" aria-hidden="true" inert>
+    <div class="hud-drawer-head"><div><span class="hud-kicker" data-i18n="hudSynthetic">DEMO / SYNTHETIC</span><h2 id="hudDrawerTitle">Radar</h2></div><button id="closeHudDrawer" class="icon-button" type="button" data-i18n="hudClose">Close</button></div>
+    <div id="hudDrawerContent" class="hud-drawer-content"></div>
+    <p class="hud-drawer-foot" data-i18n="hudLocalOnly">Local demo only · nothing submitted or shared.</p>
+  </aside>
+  <nav id="cyberDock" class="cyber-dock" aria-label="Command tools" data-i18n-aria="hudControlsAria">
+    <button type="button" class="dock-button" data-hud-panel="radar" aria-controls="filterDrawer" aria-pressed="false"><span class="dock-glyph" aria-hidden="true">◉</span><span class="dock-label" data-i18n="dockRadar">Radar</span></button>
+    <button type="button" class="dock-button" data-hud-panel="ai" aria-controls="hudDrawer" aria-pressed="false"><span class="dock-glyph" aria-hidden="true">✦</span><span class="dock-label" data-i18n="dockAI">AI</span></button>
+    <button type="button" class="dock-button" data-hud-panel="automation" aria-controls="hudDrawer" aria-pressed="false"><span class="dock-glyph" aria-hidden="true">⇄</span><span class="dock-label" data-i18n="dockAutomation">n8n</span></button>
+    <button type="button" class="dock-button" data-hud-panel="revenue" aria-controls="hudDrawer" aria-pressed="false"><span class="dock-glyph" aria-hidden="true">$</span><span class="dock-label" data-i18n="dockRevenue">Revenue</span></button>
+    <button type="button" class="dock-button" data-hud-panel="settings" aria-controls="hudDrawer" aria-pressed="false"><span class="dock-glyph" aria-hidden="true">⚙</span><span class="dock-label" data-i18n="dockSettings">Settings</span></button>
+    <button id="focusModeToggle" type="button" class="dock-button" aria-pressed="false"><span class="dock-glyph" aria-hidden="true">⛶</span><span id="focusModeLabel" class="dock-label" data-i18n="dockFocus">Focus</span></button>
+    <button type="button" class="dock-button" data-hud-panel="safety" aria-controls="hudDrawer" aria-pressed="false"><span class="dock-glyph safety-glyph" aria-hidden="true">⬡</span><span class="dock-label" data-i18n="dockSafety">Safety</span></button>
+  </nav>
   <div class="workspace">
-    <aside id="filterDrawer" class="sidebar" aria-label="Search and filters" aria-hidden="false">
+    <aside id="filterDrawer" class="sidebar" aria-label="Search and filters" data-i18n-aria="filters" aria-hidden="false">
       <div class="drawer-heading"><h2 class="side-heading" data-i18n="filters">Search &amp; filters</h2><button id="closeFilters" class="icon-button drawer-close" type="button" data-i18n="filterClose">Close filters</button></div>
       <section class="status-block" aria-label="System status">
         <h2 class="side-heading" data-i18n="system">SYSTEM</h2>
@@ -54,6 +69,14 @@
           <button id="clearFilters" class="clear-btn" type="button" data-i18n="clearFilters">Clear filters</button>
         </div>
       </section>
+      <details id="participationEntry" class="participation-entry">
+        <summary data-i18n="hudParticipation">Participation · local demo</summary>
+        <p class="participation-question" data-i18n="hudWhatBrings">WHAT BRINGS YOU HERE?</p>
+        <p data-i18n="hudParticipationNote">Choose an example only. No personal details are collected and nothing is sent.</p>
+        <p class="network-vision" data-i18n="hudNetworkVision">Supply ↔ demand · skills ↔ needs · people ↔ solutions · future concept only.</p>
+        <div class="participation-actions"><button type="button" data-participation="find" data-i18n="hudFindOpportunity">Find an opportunity</button><button type="button" data-participation="skill" data-i18n="hudOfferSkill">Offer a skill</button><button type="button" data-participation="service" data-i18n="hudOfferService">Offer a service</button><button type="button" data-participation="client" data-i18n="hudFindClient">Find a client</button><button type="button" data-participation="job" data-i18n="hudFindJob">Find a job</button><button type="button" data-participation="partner" data-i18n="hudFindPartner">Find a partner</button><button type="button" data-participation="explore" data-i18n="hudExplore">Explore</button></div>
+        <p id="participationStatus" class="participation-status" role="status" aria-live="polite" hidden></p>
+      </details>
       <section class="future-box"><strong data-i18n="dataReadiness">REAL DATA SOURCES · NOT CONNECTED</strong><p data-i18n="noExternalByDefault">No third-party request is made on initial load.</p></section>
     </aside>
 
@@ -84,6 +107,7 @@
 			    <div class="map-shell" id="mapShell" data-visual="map">
 	              <div id="globeStage" class="globe-stage" role="group" aria-label="Interactive 3D globe with synthetic city markers" data-i18n-aria="globeAria" aria-hidden="true">
 	                <div id="globeCanvasHost" class="globe-canvas-host"></div>
+	                <span id="globePointLabel" class="globe-point-label" role="status" aria-live="polite" hidden></span>
                 <span class="globe-demo-tag" data-i18n="syntheticIntelligence">DEMO / SYNTHETIC INTELLIGENCE</span>
 	                <p id="globeInstructions" class="globe-instructions" data-i18n="globeInstructions">Drag to rotate · wheel or pinch to zoom · select a marker to open its synthetic dossier.</p>
 	                <span id="globeStatus" class="globe-status" role="status" aria-live="polite" data-i18n="globeStatusReady">Local 3D globe · synthetic markers</span>
@@ -94,6 +118,7 @@
 	                </div>
 	              </div>
 	              <div id="map" role="region" tabindex="0" aria-label="World map with synthetic city examples" data-i18n-aria="mapAria" aria-hidden="false"></div>
+	              <div id="globeFallbackMessage" class="globe-fallback-message" role="status" aria-live="polite" hidden></div>
 	              <div class="map-controls" aria-label="Map controls" data-i18n-aria="mapControlsLabel">
 	                <div class="segmented visual-mode" role="group" aria-label="Visualization mode" data-i18n-aria="visualModeAria"><button id="globeModeButton" type="button" data-visual-mode="globe" data-i18n="globeView">3D Globe</button><button id="mapModeButton" type="button" data-visual-mode="map" class="active" data-i18n="map2dView">2D Map</button></div>
 	                <div class="segmented" role="group" aria-label="Map view" data-i18n-aria="mapView"><button type="button" data-view="world" class="active" data-i18n="viewWorld">World</button><button type="button" data-view="region" data-i18n="viewRegion">Region</button><button type="button" data-view="country" data-i18n="viewCountry">Country</button><button type="button" data-view="city" data-i18n="viewCity">City</button></div>

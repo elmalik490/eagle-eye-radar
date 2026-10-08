@@ -21,8 +21,10 @@ export const translations = {
 export const languageNames = { en:'🇬🇧 English', fr:'🇫🇷 Français', ar:'🇩🇿 العربية', ru:'🇷🇺 Русский', zh:'🇨🇳 中文', ko:'🇰🇷 한국어' };
 import { worldRadarTranslations } from './world-radar-i18n.js';
 import { phase5Translations } from './phase5-i18n.js';
+import { hudTranslations } from './hud-i18n.js';
 for (const code of Object.keys(translations)) Object.assign(translations[code], worldRadarTranslations[code] || {});
 for (const code of Object.keys(translations)) Object.assign(translations[code], phase5Translations[code] || {});
+for (const code of Object.keys(translations)) Object.assign(translations[code], hudTranslations[code] || hudTranslations.en);
 export function getLanguage() { const saved = localStorage.getItem('eagle-eye-language'); return translations[saved] ? saved : 'en'; }
 export function applyLanguage(language) {
   const lang = translations[language] ? language : 'en';
